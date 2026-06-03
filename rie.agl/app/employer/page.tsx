@@ -402,16 +402,16 @@ export default function EmployerDashboard() {
         }
       />
 
-      <main className="flex-1 p-4 sm:p-6 space-y-6 overflow-auto bg-[#F4F6F9]">
+      <main className="flex-1 p-6 sm:p-8 space-y-8 overflow-auto bg-[#F4F6F9]">
         {/* ── KPI Stat Cards ──────────────────────────────────────── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
           {loading
             ? [0, 1, 2, 3].map((i) => <SkeletonStatCard key={i} />)
             : stats.map((s) => <StatCard key={s.label} {...s} />)}
         </div>
 
         {/* ── Middle row: Applications table + Pipeline ────────────── */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* Recent Applications */}
           <div
             className="card xl:col-span-2 overflow-hidden animate-fade-in-up"
@@ -541,7 +541,7 @@ export default function EmployerDashboard() {
               <p className="text-xs mt-0.5 text-[#535E75]">Current funnel health</p>
             </div>
 
-            <div className="p-5 space-y-4 flex-1">
+            <div className="p-5 space-y-5 flex-1">
               {loading
                 ? [0, 1, 2, 3].map((i) => (
                     <div key={i} className="space-y-1.5">
@@ -602,9 +602,9 @@ export default function EmployerDashboard() {
           </div>
 
           {/* scrollable cards */}
-          <div className="px-5 py-4 overflow-x-auto">
+          <div className="px-5 py-5 overflow-x-auto">
             {loading ? (
-              <div className="flex gap-4 pb-1">
+              <div className="flex gap-5 pb-1">
                 {[0, 1, 2, 3].map((i) => (
                   <SkeletonJobCard key={i} />
                 ))}
@@ -620,7 +620,7 @@ export default function EmployerDashboard() {
                 </Link>
               </p>
             ) : (
-              <div className="flex gap-4 pb-1">
+              <div className="flex gap-5 pb-1">
                 {jobs.map((job, i) => (
                   <JobCard key={job.id} job={job} delay={0.44 + i * 0.05} />
                 ))}

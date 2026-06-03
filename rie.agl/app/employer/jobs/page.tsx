@@ -63,7 +63,7 @@ export default function JobsPage() {
   return (
     <>
       {/* Page Header */}
-      <div className="bg-white border-b border-[#E2E6EF] px-6 py-4 flex items-center justify-between gap-4 flex-wrap">
+      <div className="bg-white border-b border-[#E2E6EF] px-8 py-5 flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-xl font-bold text-[#0A0F24]">Job Management</h1>
           <p className="text-sm text-[#535E75] mt-0.5">Create and manage your job postings</p>
@@ -77,16 +77,16 @@ export default function JobsPage() {
         </Link>
       </div>
 
-      <main className="flex-1 p-6 overflow-auto bg-[#F4F6F9]">
+      <main className="flex-1 p-8 overflow-auto bg-[#F4F6F9]">
         {/* Toolbar */}
-        <div className="flex flex-wrap items-center gap-3 mb-6">
+        <div className="flex flex-wrap items-center gap-4 mb-8">
           {/* Status Tabs */}
           <div className="flex rounded-xl overflow-hidden border border-[#E2E6EF] bg-white shadow-sm">
             {STATUSES.map(s => (
               <button
                 key={s.value}
                 onClick={() => setStatus(s.value)}
-                className={`px-4 py-2 text-sm font-medium transition-all duration-200 flex items-center gap-1.5 ${
+                className={`px-5 py-2.5 text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
                   status === s.value
                     ? 'bg-gradient-to-r from-[#001CB0] to-[#0025E0] text-white'
                     : 'text-[#535E75] hover:bg-[#F4F6F9]'
@@ -109,7 +109,7 @@ export default function JobsPage() {
           {/* Division Select */}
           <div className="relative">
             <select
-              className="appearance-none bg-white border border-[#E2E6EF] rounded-xl px-4 py-2 pr-9 text-sm text-[#0A0F24] font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-[#001CB0]/20 focus:border-[#001CB0] transition-all duration-200 cursor-pointer"
+              className="appearance-none bg-white border border-[#E2E6EF] rounded-xl px-4 py-2.5 pr-9 text-sm text-[#0A0F24] font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-[#001CB0]/20 focus:border-[#001CB0] transition-all duration-200 cursor-pointer"
               value={division}
               onChange={e => setDivision(e.target.value as Division | 'all')}
             >
@@ -122,7 +122,7 @@ export default function JobsPage() {
           <div className="relative flex-1 min-w-[200px] max-w-sm">
             <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#535E75]" />
             <input
-              className="w-full bg-white border border-[#E2E6EF] rounded-xl pl-10 pr-4 py-2 text-sm text-[#0A0F24] placeholder:text-[#535E75] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#001CB0]/20 focus:border-[#001CB0] transition-all duration-200"
+              className="w-full bg-white border border-[#E2E6EF] rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#0A0F24] placeholder:text-[#535E75] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#001CB0]/20 focus:border-[#001CB0] transition-all duration-200"
               placeholder="Search jobs by title or location..."
               value={search}
               onChange={e => setSearch(e.target.value)}
@@ -158,7 +158,7 @@ export default function JobsPage() {
 
         {/* Loading Skeleton */}
         {loading && (
-          <div className={view === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5' : 'space-y-3'}>
+          <div className={view === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' : 'space-y-4'}>
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="bg-white rounded-2xl border border-[#E2E6EF] shadow-sm p-5 animate-pulse">
                 <div className="flex items-center gap-3 mb-4">
@@ -191,7 +191,7 @@ export default function JobsPage() {
 
         {/* Job Cards */}
         {!loading && !error && filtered.length > 0 && (
-          <div className={view === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5' : 'space-y-3'}>
+          <div className={view === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' : 'space-y-4'}>
             {filtered.map((job, i) => (
               <div
                 key={job.id}

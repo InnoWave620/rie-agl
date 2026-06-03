@@ -52,7 +52,7 @@ export default function LoginForm() {
     <div className="min-h-screen flex bg-white">
 
       {/* ══════════════════ LEFT PANEL ══════════════════ */}
-      <div className="hidden lg:flex flex-col justify-between w-1/2 relative overflow-hidden bg-gradient-to-br from-[#0A0F24] to-[#001CB0] p-16">
+      <div className="hidden lg:flex flex-col justify-between w-1/2 relative overflow-hidden bg-gradient-to-br from-[#0A0F24] to-[#001CB0] px-20 py-16">
 
         {/* Dot-grid overlay */}
         <div
@@ -95,13 +95,13 @@ export default function LoginForm() {
           </div>
 
           {/* 2×2 glass stat cards */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-5">
             {STATS.map(stat => (
               <div
                 key={stat.label}
                 className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm p-5 transition-all duration-300 hover:bg-white/10 hover:border-white/20 hover:scale-[1.02]"
               >
-                <div className="text-3xl font-black text-[#E66423] mb-0.5">{stat.value}</div>
+                <div className="text-4xl font-black text-[#E66423] mb-0.5">{stat.value}</div>
                 <div className="text-sm text-white/55 font-medium">{stat.label}</div>
               </div>
             ))}
@@ -140,22 +140,22 @@ export default function LoginForm() {
               <p className="text-sm text-gray-500">Access your employer dashboard</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-6">
 
               {/* Email */}
               <div>
-                <label className="block text-xs font-semibold text-[#0A0F24]/70 uppercase tracking-widest mb-1.5" htmlFor="email">
+                <label className="block text-xs font-semibold text-[#0A0F24]/70 uppercase tracking-widest mb-2" htmlFor="email">
                   Email Address
                 </label>
                 <div className="relative">
                   <Mail
-                    size={16}
-                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
                   />
                   <input
                     id="email"
                     type="email"
-                    className="w-full h-11 pl-10 pr-4 rounded-xl border border-gray-200 bg-[#F4F6F9] text-sm text-[#0A0F24] placeholder-gray-400 outline-none transition focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/15 hover:border-gray-300"
+                    className="w-full h-13 pl-12 pr-4 rounded-xl border border-gray-200 bg-[#F4F6F9] text-base text-[#0A0F24] placeholder-gray-400 outline-none transition focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/15 hover:border-gray-300"
                     placeholder="you@agl.com"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
@@ -167,18 +167,18 @@ export default function LoginForm() {
 
               {/* Password */}
               <div>
-                <label className="block text-xs font-semibold text-[#0A0F24]/70 uppercase tracking-widest mb-1.5" htmlFor="password">
+                <label className="block text-xs font-semibold text-[#0A0F24]/70 uppercase tracking-widest mb-2" htmlFor="password">
                   Password
                 </label>
                 <div className="relative">
                   <Lock
-                    size={16}
-                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                    size={18}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
                   />
                   <input
                     id="password"
                     type={showPw ? 'text' : 'password'}
-                    className="w-full h-11 pl-10 pr-11 rounded-xl border border-gray-200 bg-[#F4F6F9] text-sm text-[#0A0F24] placeholder-gray-400 outline-none transition focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/15 hover:border-gray-300"
+                    className="w-full h-13 pl-12 pr-11 rounded-xl border border-gray-200 bg-[#F4F6F9] text-base text-[#0A0F24] placeholder-gray-400 outline-none transition focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/15 hover:border-gray-300"
                     placeholder="••••••••"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
@@ -209,7 +209,7 @@ export default function LoginForm() {
                 type="submit"
                 id="login-submit"
                 disabled={loading}
-                className="w-full h-12 rounded-xl bg-gradient-to-r from-[#001CB0] to-[#0033E0] text-white font-bold text-sm tracking-wide shadow-lg shadow-[#001CB0]/30 transition-all duration-200 hover:shadow-xl hover:shadow-[#001CB0]/40 hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full h-[52px] rounded-xl bg-gradient-to-r from-[#001CB0] to-[#0033E0] text-white font-bold text-sm tracking-wide shadow-lg shadow-[#001CB0]/30 transition-all duration-200 hover:shadow-xl hover:shadow-[#001CB0]/40 hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>

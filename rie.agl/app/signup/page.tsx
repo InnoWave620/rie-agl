@@ -49,7 +49,7 @@ const STRENGTH_TEXT   = ['', 'text-red-500', 'text-amber-500', 'text-emerald-500
 
 // ── Shared input class ────────────────────────────────────────────────────────
 const INPUT_CLS =
-  'w-full h-11 rounded-xl border border-gray-200 bg-[#F4F6F9] text-sm text-[#0A0F24] ' +
+  'w-full h-13 rounded-xl border border-gray-200 bg-[#F4F6F9] text-base text-[#0A0F24] ' +
   'placeholder-gray-400 outline-none transition ' +
   'focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/15 hover:border-gray-300';
 
@@ -121,7 +121,7 @@ export default function SignupPage() {
     <div className="min-h-screen flex bg-white">
 
       {/* ══════════════════ LEFT PANEL ══════════════════ */}
-      <div className="hidden lg:flex flex-col justify-between w-1/2 relative overflow-hidden bg-gradient-to-br from-[#0A0F24] to-[#001CB0] p-16">
+      <div className="hidden lg:flex flex-col justify-between w-1/2 relative overflow-hidden bg-gradient-to-br from-[#0A0F24] to-[#001CB0] px-20 py-16">
 
         {/* Dot-grid overlay */}
         <div
@@ -163,7 +163,7 @@ export default function SignupPage() {
             </p>
           </div>
 
-          <ul className="space-y-3">
+          <ul className="space-y-4">
             {FEATURES.map(f => (
               <li key={f.text} className="flex items-center gap-3 text-white/75 text-sm">
                 <span className="text-base">{f.icon}</span>
@@ -225,18 +225,18 @@ export default function SignupPage() {
                   <p className="text-sm text-gray-500">Join the AGL recruitment team</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-5">
 
                   {/* Full Name */}
                   <div>
-                    <label className="block text-xs font-semibold text-[#0A0F24]/70 uppercase tracking-widest mb-1.5" htmlFor="fullName">
+                    <label className="block text-xs font-semibold text-[#0A0F24]/70 uppercase tracking-widest mb-2" htmlFor="fullName">
                       Full Name *
                     </label>
                     <div className="relative">
-                      <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                      <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                       <input
                         id="fullName" type="text"
-                        className={`${INPUT_CLS} pl-10 pr-4`}
+                        className={`${INPUT_CLS} pl-12 pr-4`}
                         placeholder="e.g. Jane Doe"
                         value={form.fullName}
                         onChange={e => update('fullName', e.target.value)}
@@ -247,14 +247,14 @@ export default function SignupPage() {
 
                   {/* Work Email */}
                   <div>
-                    <label className="block text-xs font-semibold text-[#0A0F24]/70 uppercase tracking-widest mb-1.5" htmlFor="email">
+                    <label className="block text-xs font-semibold text-[#0A0F24]/70 uppercase tracking-widest mb-2" htmlFor="email">
                       Work Email *
                     </label>
                     <div className="relative">
-                      <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                      <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                       <input
                         id="email" type="email"
-                        className={`${INPUT_CLS} pl-10 pr-4`}
+                        className={`${INPUT_CLS} pl-12 pr-4`}
                         placeholder="you@agl.com"
                         value={form.email}
                         onChange={e => update('email', e.target.value)}
@@ -264,9 +264,9 @@ export default function SignupPage() {
                   </div>
 
                   {/* Role + Department */}
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-semibold text-[#0A0F24]/70 uppercase tracking-widest mb-1.5" htmlFor="role">
+                      <label className="block text-xs font-semibold text-[#0A0F24]/70 uppercase tracking-widest mb-2" htmlFor="role">
                         Role *
                       </label>
                       <select
@@ -282,14 +282,14 @@ export default function SignupPage() {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-[#0A0F24]/70 uppercase tracking-widest mb-1.5" htmlFor="department">
+                      <label className="block text-xs font-semibold text-[#0A0F24]/70 uppercase tracking-widest mb-2" htmlFor="department">
                         Department
                       </label>
                       <div className="relative">
-                        <Building2 size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                        <Building2 size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                         <select
                           id="department"
-                          className={`${INPUT_CLS} pl-9 pr-3`}
+                          className={`${INPUT_CLS} pl-11 pr-3`}
                           value={form.department}
                           onChange={e => update('department', e.target.value)}
                         >
@@ -303,15 +303,15 @@ export default function SignupPage() {
 
                   {/* Password */}
                   <div>
-                    <label className="block text-xs font-semibold text-[#0A0F24]/70 uppercase tracking-widest mb-1.5" htmlFor="password">
+                    <label className="block text-xs font-semibold text-[#0A0F24]/70 uppercase tracking-widest mb-2" htmlFor="password">
                       Password *
                     </label>
                     <div className="relative">
-                      <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                      <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                       <input
                         id="password"
                         type={showPw ? 'text' : 'password'}
-                        className={`${INPUT_CLS} pl-10 pr-11`}
+                        className={`${INPUT_CLS} pl-12 pr-11`}
                         placeholder="Min. 8 characters"
                         value={form.password}
                         onChange={e => update('password', e.target.value)}
@@ -349,15 +349,15 @@ export default function SignupPage() {
 
                   {/* Confirm Password */}
                   <div>
-                    <label className="block text-xs font-semibold text-[#0A0F24]/70 uppercase tracking-widest mb-1.5" htmlFor="confirmPw">
+                    <label className="block text-xs font-semibold text-[#0A0F24]/70 uppercase tracking-widest mb-2" htmlFor="confirmPw">
                       Confirm Password *
                     </label>
                     <div className="relative">
-                      <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                      <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                       <input
                         id="confirmPw"
                         type={showCpw ? 'text' : 'password'}
-                        className={`${INPUT_CLS} pl-10 pr-11 ${pwMismatch ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : ''}`}
+                        className={`${INPUT_CLS} pl-12 pr-11 ${pwMismatch ? 'border-red-300 focus:border-red-400 focus:ring-red-100' : ''}`}
                         placeholder="Re-enter your password"
                         value={form.confirmPw}
                         onChange={e => update('confirmPw', e.target.value)}
@@ -391,7 +391,7 @@ export default function SignupPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full h-12 rounded-xl bg-gradient-to-r from-[#001CB0] to-[#0033E0] text-white font-bold text-sm tracking-wide shadow-lg shadow-[#001CB0]/30 transition-all duration-200 hover:shadow-xl hover:shadow-[#001CB0]/40 hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full h-[52px] rounded-xl bg-gradient-to-r from-[#001CB0] to-[#0033E0] text-white font-bold text-sm tracking-wide shadow-lg shadow-[#001CB0]/30 transition-all duration-200 hover:shadow-xl hover:shadow-[#001CB0]/40 hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {loading ? (
                       <>

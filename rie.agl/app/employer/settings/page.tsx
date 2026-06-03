@@ -53,25 +53,25 @@ export default function SettingsPage() {
     <>
       <Header title="Settings" subtitle="Platform configuration and team management" />
 
-      <main className="flex-1 p-4 sm:p-6 overflow-auto bg-[#F4F6F9]">
-        <div className="flex flex-col md:flex-row gap-6 max-w-6xl mx-auto">
+      <main className="flex-1 p-6 sm:p-8 overflow-auto bg-[#F4F6F9]">
+        <div className="flex flex-col md:flex-row gap-8 max-w-6xl mx-auto">
 
           {/* ── Sidebar ── */}
-          <aside className="w-full md:w-56 shrink-0">
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-2 md:sticky md:top-6">
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-3 pt-2 pb-3">Settings</p>
-              <nav className="space-y-0.5">
+          <aside className="w-full md:w-60 shrink-0">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-3 md:sticky md:top-6">
+              <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest px-3 pt-2 pb-4">Settings</p>
+              <nav className="space-y-1.5">
                 {SETTING_TABS.map(tab => (
                   <button
                     key={tab.key}
                     onClick={() => setActiveTab(tab.key)}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all text-left ${
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all text-left ${
                       activeTab === tab.key
                         ? 'bg-[#001CB0] text-white shadow-md shadow-[#001CB0]/20'
                         : 'text-gray-500 hover:text-[#001CB0] hover:bg-[#001CB0]/5'
                     }`}
                   >
-                    <tab.icon size={15} />
+                    <tab.icon size={16} />
                     {tab.label}
                   </button>
                 ))}
@@ -80,18 +80,18 @@ export default function SettingsPage() {
           </aside>
 
           {/* ── Content ── */}
-          <div className="flex-1 space-y-5 min-w-0">
+          <div className="flex-1 space-y-6 min-w-0">
 
             {/* ── Team Management ── */}
             {activeTab === 'team' && (
               <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
-                <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+                <div className="flex items-center justify-between px-7 py-6 border-b border-gray-100">
                   <div>
-                    <h2 className="font-bold text-[#0A0F24]">Team Members</h2>
-                    <p className="text-xs text-gray-400 mt-0.5 font-medium">Manage HR team access to the platform</p>
+                    <h2 className="text-lg font-bold text-[#0A0F24]">Team Members</h2>
+                    <p className="text-sm text-gray-400 mt-1 font-medium">Manage HR team access to the platform</p>
                   </div>
-                  <button className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold text-white bg-[#001CB0] hover:bg-[#0020CC] shadow-sm shadow-[#001CB0]/20 transition-all">
-                    <Plus size={14} /> Invite Member
+                  <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-[#001CB0] hover:bg-[#0020CC] shadow-sm shadow-[#001CB0]/20 transition-all">
+                    <Plus size={15} /> Invite Member
                   </button>
                 </div>
 
@@ -106,17 +106,17 @@ export default function SettingsPage() {
                       <thead>
                         <tr className="bg-gray-50/60">
                           {['Member', 'Role', 'Division', 'Status', ''].map(h => (
-                            <th key={h} className="px-6 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">{h}</th>
+                            <th key={h} className="px-7 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">{h}</th>
                           ))}
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-50">
+                      <tbody className="divide-y divide-gray-100">
                         {users.map(user => (
                           <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
-                            <td className="px-6 py-4">
+                            <td className="px-7 py-5">
                               <div className="flex items-center gap-3">
                                 <div
-                                  className="w-9 h-9 rounded-xl flex items-center justify-center text-white text-xs font-bold shrink-0"
+                                  className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-xs font-bold shrink-0"
                                   style={{ background: user.id === currentUserId ? '#E66423' : '#001CB0' }}
                                 >
                                   {user.avatarInitials}
@@ -132,19 +132,19 @@ export default function SettingsPage() {
                                 </div>
                               </div>
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-7 py-5">
                               <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold ${roleBadgeStyle(user.role)}`}>
                                 {user.role.replace('_', ' ')}
                               </span>
                             </td>
-                            <td className="px-6 py-4 text-sm text-gray-600 font-medium">{user.division ?? 'All Divisions'}</td>
-                            <td className="px-6 py-4">
+                            <td className="px-7 py-5 text-sm text-gray-600 font-medium">{user.division ?? 'All Divisions'}</td>
+                            <td className="px-7 py-5">
                               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-green-700 bg-green-50">
                                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
                                 Active
                               </span>
                             </td>
-                            <td className="px-6 py-4">
+                            <td className="px-7 py-5">
                               <button className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#001CB0] hover:bg-[#001CB0]/10 transition-all">
                                 <Edit2 size={13} />
                               </button>
@@ -160,11 +160,11 @@ export default function SettingsPage() {
 
             {/* ── Roles & Permissions ── */}
             {activeTab === 'roles' && (
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                <h2 className="font-bold text-[#0A0F24] mb-1">Role-Based Access Control</h2>
-                <p className="text-xs text-gray-400 font-medium mb-6">Define what each role can see and do within the platform.</p>
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-7">
+                <h2 className="text-lg font-bold text-[#0A0F24] mb-1.5">Role-Based Access Control</h2>
+                <p className="text-sm text-gray-400 font-medium mb-7">Define what each role can see and do within the platform.</p>
 
-                <div className="space-y-4">
+                <div className="space-y-5">
                   {[
                     {
                       role: 'Admin',
@@ -188,7 +188,7 @@ export default function SettingsPage() {
                       permissions: ['Assigned jobs only', 'Candidate profiles', 'Basic pipeline actions', 'Cannot delete or bulk actions', 'Cannot access audit logs'],
                     },
                   ].map(r => (
-                    <div key={r.role} className={`p-5 rounded-xl border ${r.bg} ${r.border}`}>
+                    <div key={r.role} className={`p-6 rounded-xl border ${r.bg} ${r.border}`}>
                       <div className="font-bold text-sm mb-3" style={{ color: r.color }}>{r.role}</div>
                       <div className="flex flex-wrap gap-2">
                         {r.permissions.map(p => (
@@ -205,9 +205,9 @@ export default function SettingsPage() {
 
             {/* ── Notifications ── */}
             {activeTab === 'notifications' && (
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                <h2 className="font-bold text-[#0A0F24] mb-1">Notification Preferences</h2>
-                <p className="text-xs text-gray-400 font-medium mb-6">Choose when and how you receive platform alerts.</p>
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-7">
+                <h2 className="text-lg font-bold text-[#0A0F24] mb-1.5">Notification Preferences</h2>
+                <p className="text-sm text-gray-400 font-medium mb-7">Choose when and how you receive platform alerts.</p>
 
                 <div className="space-y-1">
                   {[
@@ -240,7 +240,7 @@ export default function SettingsPage() {
                   ))}
                 </div>
 
-                <button className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-[#0A0F24] hover:bg-[#001CB0] transition-all shadow-sm">
+                <button className="mt-8 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-[#0A0F24] hover:bg-[#001CB0] transition-all shadow-sm">
                   <Save size={14} /> Save Preferences
                 </button>
               </div>
@@ -249,9 +249,9 @@ export default function SettingsPage() {
             {/* ── POPIA Compliance ── */}
             {activeTab === 'compliance' && (
               <div className="space-y-5">
-                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                  <h2 className="font-bold text-[#0A0F24] mb-1">POPIA Compliance Settings</h2>
-                  <p className="text-xs text-gray-400 font-medium mb-6">Configure data retention and consent management.</p>
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-7">
+                  <h2 className="text-lg font-bold text-[#0A0F24] mb-1.5">POPIA Compliance Settings</h2>
+                  <p className="text-sm text-gray-400 font-medium mb-7">Configure data retention and consent management.</p>
 
                   <div className="space-y-6">
                     {/* Data Retention */}
@@ -301,7 +301,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  <button className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-[#0A0F24] hover:bg-[#001CB0] transition-all shadow-sm">
+                  <button className="mt-8 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-[#0A0F24] hover:bg-[#001CB0] transition-all shadow-sm">
                     <Save size={14} /> Save Compliance Settings
                   </button>
                 </div>
@@ -310,9 +310,9 @@ export default function SettingsPage() {
 
             {/* ── Security ── */}
             {activeTab === 'security' && (
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-                <h2 className="font-bold text-[#0A0F24] mb-1">Security Settings</h2>
-                <p className="text-xs text-gray-400 font-medium mb-6">Platform security configuration and active protections.</p>
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-7">
+                <h2 className="text-lg font-bold text-[#0A0F24] mb-1.5">Security Settings</h2>
+                <p className="text-sm text-gray-400 font-medium mb-7">Platform security configuration and active protections.</p>
 
                 <div className="space-y-0 divide-y divide-gray-50">
                   {[
