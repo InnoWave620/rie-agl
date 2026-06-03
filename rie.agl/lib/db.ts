@@ -1,41 +1,40 @@
-import sql from 'mssql';
+// Using msnodesqlv8 directly (not wrapped by mssql) for reliable Windows Auth via ODBC
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const driver = require('msnodesqlv8');
 
-// Windows Authentication uses the msnodesqlv8 native driver.
-// No username or password needed — it uses the currently logged-in Windows user.
-const config: sql.config = {
-  server: process.env.DB_SERVER!,   // e.g. "localhost\\SQLEXPRESS" or just "localhost"
-  database: process.env.DB_NAME!,   // e.g. "rie_agl"
-  driver: 'msnodesqlv8',
-  options: {
-    trustedConnection: true,             // Windows Auth — no SQL login needed
-    trustServerCertificate: true,        // OK for local/dev; set false in production
-    encrypt: false,                      // Set true only for Azure SQL
-  },
-  pool: {
-    max: 10,
-    min: 0,
-    idleTimeoutMillis: 30000,
-  },
-};
+const connectionString =
+  `Driver={ODBC Driver 17 for SQL Server};` +
+  `Server=localhost,${process.env.DB_PORT || '51091'};` +
+  `Database=${process.env.DB_NAME};` +
+  `Trusted_Connection=yes;` +
+  `TrustServerCertificate=yes;`;
 
-// Singleton pool — reused across hot-reloads in dev
-let pool: sql.ConnectionPool | null = null;
+// Singleton connection — reused across requests
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let connection: any = null;
 
-export async function getPool(): Promise<sql.ConnectionPool> {
-  if (pool && pool.connected) return pool;
-
-  pool = await sql.connect(config);
-  return pool;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function getConnection(): Promise<any> {
+  return new Promise((resolve, reject) => {
+    if (connection) return resolve(connection);
+    driver.open(connectionString, (err: Error, conn: unknown) => {
+      if (err) return reject(err);
+      connection = conn;
+      resolve(conn);
+    });
+  });
 }
 
-/** Convenience helper to run a parameterised query */
-export async function query<T = sql.IRecordSet<Record<string, unknown>>>(
-  queryString: string,
-  params?: (req: sql.Request) => void
-): Promise<T> {
-  const p = await getPool();
-  const request = p.request();
-  if (params) params(request);
-  const result = await request.query(queryString);
-  return result.recordset as T;
+/** Run a SQL query and return the result rows */
+export async function query<T = Record<string, unknown>>(
+  queryString: string
+): Promise<T[]> {
+  const conn = await getConnection();
+  return new Promise((resolve, reject) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    conn.query(queryString, (err: Error, rows: any[]) => {
+      if (err) return reject(err);
+      resolve(rows as T[]);
+    });
+  });
 }
