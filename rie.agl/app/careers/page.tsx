@@ -89,7 +89,7 @@ export default function CareersPage() {
       </nav>
 
       {/* ── Hero Section ── */}
-      <section className="relative bg-gradient-to-br from-[#0A0F24] via-[#001CB0] to-[#0025E0] min-h-[62vh] flex items-center overflow-hidden">
+      <section className="relative bg-gradient-to-br from-[#0A0F24] via-[#001CB0] to-[#0025E0] min-h-[62vh] flex flex-col justify-center items-center overflow-hidden">
         {/* Dot grid pattern */}
         <div
           className="absolute inset-0 opacity-[0.12]"
