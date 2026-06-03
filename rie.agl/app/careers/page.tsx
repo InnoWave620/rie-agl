@@ -103,30 +103,30 @@ export default function CareersPage() {
         {/* Blue glow orb bottom-left */}
         <div className="absolute bottom-[-100px] left-[-80px] w-[400px] h-[400px] rounded-full bg-[#001CB0] opacity-25 blur-[80px] pointer-events-none" />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6 py-24 flex flex-col items-center justify-center text-center w-full">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 py-28 md:py-36 flex flex-col items-center justify-center text-center w-full">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold mb-8 tracking-widest uppercase bg-[#E66423]/20 text-[#E66423] border border-[#E66423]/30">
+          <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold mb-10 tracking-widest uppercase bg-[#E66423]/20 text-[#E66423] border border-[#E66423]/30">
             <Anchor size={12} />
             {loading ? '…' : publishedJobs.length} Open Positions Across Africa
           </div>
 
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-white mb-6 leading-[1.05] tracking-tight">
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-white mb-8 leading-[1.05] tracking-tight">
             Join Africa&apos;s Largest<br />
             <span className="text-[#E66423]">Logistics Network</span>
           </h1>
 
-          <p className="text-white/60 text-lg md:text-xl max-w-2xl mx-auto mb-12 leading-relaxed font-light">
+          <p className="text-white/60 text-lg md:text-xl max-w-2xl mx-auto mb-14 leading-relaxed font-light">
             Africa Global Logistics operates 24 port concessions and 2 rail concessions across 51 African countries. Shape the continent&apos;s future with us.
           </p>
 
           {/* Search Bar */}
-          <div className="w-full max-w-2xl mx-auto relative group">
+          <div className="w-full max-w-3xl mx-auto relative group">
             <div className="absolute inset-0 bg-[#E66423]/20 rounded-2xl blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
             <div className="relative flex items-center bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl overflow-hidden focus-within:border-white/40 focus-within:bg-white/15 transition-all duration-300">
-              <Search size={18} className="absolute left-5 text-white/40 pointer-events-none" />
+              <Search size={20} className="absolute left-6 text-white/40 pointer-events-none" />
               <input
                 type="text"
-                className="flex-1 bg-transparent text-white placeholder-white/40 text-base py-4 pl-14 pr-4 outline-none"
+                className="flex-1 bg-transparent text-white placeholder-white/40 text-lg py-5 pl-16 pr-6 outline-none w-full min-w-0"
                 placeholder="Search by role, location, country..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
@@ -134,16 +134,16 @@ export default function CareersPage() {
               {search && (
                 <button
                   onClick={() => setSearch('')}
-                  className="pr-4 text-white/40 hover:text-white transition-colors"
+                  className="pr-5 text-white/40 hover:text-white transition-colors"
                 >
-                  <X size={16} />
+                  <X size={18} />
                 </button>
               )}
             </div>
           </div>
 
           {/* Stats row */}
-          <div className="mt-16 flex flex-wrap items-center justify-center gap-8 md:gap-16">
+          <div className="mt-20 flex flex-wrap items-center justify-center gap-10 md:gap-20">
             {[
               { value: '51', label: 'Countries' },
               { value: '23K+', label: 'Employees' },
@@ -151,8 +151,8 @@ export default function CareersPage() {
               { value: '2', label: 'Rail Concessions' },
             ].map(stat => (
               <div key={stat.label} className="text-center">
-                <div className="text-3xl font-black text-white">{stat.value}</div>
-                <div className="text-white/40 text-sm font-medium mt-0.5">{stat.label}</div>
+                <div className="text-4xl font-black text-white">{stat.value}</div>
+                <div className="text-white/40 text-sm font-medium mt-1.5">{stat.label}</div>
               </div>
             ))}
           </div>
