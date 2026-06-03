@@ -172,7 +172,11 @@ export default function ApplicationFormPage({ params }: Props) {
             <ChevronLeft size={16} /> Job Details
           </Link>
           <Link href="/careers" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-lg bg-[#E66423] flex items-center justify-center font-black text-white text-xs group-hover:scale-105 transition-transform">AGL</div>
+            <img
+              src="/AGL.logo.png"
+              alt="AGL Logo"
+              className="h-8 w-auto object-contain brightness-0 invert group-hover:scale-105 transition-transform"
+            />
             <span className="text-white font-semibold text-sm hidden sm:block">AGL Careers</span>
           </Link>
         </div>

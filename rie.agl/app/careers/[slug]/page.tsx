@@ -92,9 +92,11 @@ export default async function JobDetailPage({ params }: Props) {
             <span>All Jobs</span>
           </Link>
           <Link href="/careers" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center font-black text-white text-xs bg-[#E66423] group-hover:scale-105 transition-transform duration-200">
-              AGL
-            </div>
+            <img
+              src="/AGL.logo.png"
+              alt="AGL Logo"
+              className="h-8 w-auto object-contain brightness-0 invert group-hover:scale-105 transition-transform duration-200"
+            />
             <span className="text-white font-semibold text-sm">AGL Careers</span>
           </Link>
         </div>

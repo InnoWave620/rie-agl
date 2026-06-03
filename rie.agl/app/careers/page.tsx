@@ -62,9 +62,11 @@ export default function CareersPage() {
       <nav className="sticky top-0 z-50 bg-[#0A0F24] border-b border-white/5 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/careers" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-white text-sm bg-[#E66423] shadow-lg shadow-[#E66423]/30 group-hover:scale-105 transition-transform duration-200">
-              AGL
-            </div>
+            <img
+              src="/AGL.logo.png"
+              alt="AGL Logo"
+              className="h-9 w-auto object-contain brightness-0 invert group-hover:scale-105 transition-transform duration-200"
+            />
             <div>
               <div className="text-white font-bold text-sm leading-tight tracking-wide">AGL Careers</div>
               <div className="text-white/40 text-xs leading-tight">Africa Global Logistics</div>

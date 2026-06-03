@@ -170,15 +170,14 @@ export default function Sidebar({ user, onClose, mobileOpen }: SidebarProps) {
         )}
 
         {/* Logo mark */}
-        <div
+        <img
+          src="/AGL.logo.png"
+          alt="AGL Logo"
           className={cn(
-            'w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-sm shrink-0',
-            'bg-gradient-to-br from-[#001CB0] to-[#0025E0]',
-            'shadow-[0_4px_12px_rgba(0,28,176,0.5)]',
+            'object-contain brightness-0 invert transition-all duration-300 shrink-0',
+            collapsed ? 'h-7 w-7' : 'h-8 w-auto',
           )}
-        >
-          A
-        </div>
+        />
 
         {/* Brand text */}
         {!collapsed && (
