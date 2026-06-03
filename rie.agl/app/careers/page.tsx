@@ -103,7 +103,7 @@ export default function CareersPage() {
         {/* Blue glow orb bottom-left */}
         <div className="absolute bottom-[-100px] left-[-80px] w-[400px] h-[400px] rounded-full bg-[#001CB0] opacity-25 blur-[80px] pointer-events-none" />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-6 py-24 text-center w-full">
+        <div className="relative z-10 max-w-7xl mx-auto px-6 py-24 flex flex-col items-center justify-center text-center w-full">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold mb-8 tracking-widest uppercase bg-[#E66423]/20 text-[#E66423] border border-[#E66423]/30">
             <Anchor size={12} />
@@ -120,7 +120,7 @@ export default function CareersPage() {
           </p>
 
           {/* Search Bar */}
-          <div className="max-w-2xl mx-auto relative group">
+          <div className="w-full max-w-2xl mx-auto relative group">
             <div className="absolute inset-0 bg-[#E66423]/20 rounded-2xl blur-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
             <div className="relative flex items-center bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl overflow-hidden focus-within:border-white/40 focus-within:bg-white/15 transition-all duration-300">
               <Search size={18} className="absolute left-5 text-white/40 pointer-events-none" />
@@ -245,11 +245,11 @@ export default function CareersPage() {
             <span className="text-sm font-medium">Loading open positions…</span>
           </div>
         ) : filteredJobs.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="flex flex-wrap gap-6 justify-center w-full">
             {filteredJobs.map((job, i) => (
               <div
                 key={job.id}
-                className="animate-fade-in-up"
+                className="animate-fade-in-up w-full md:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] max-w-md"
                 style={{ animationDelay: `${i * 0.05}s`, opacity: 0 }}
               >
                 <JobCard job={job} variant="public" />
