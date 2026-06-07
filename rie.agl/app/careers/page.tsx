@@ -89,19 +89,34 @@ export default function CareersPage() {
       </nav>
 
       {/* ── Hero Section ── */}
-      <section className="relative bg-gradient-to-br from-[#0A0F24] via-[#001CB0] to-[#0025E0] min-h-[62vh] flex flex-col justify-center items-center overflow-hidden">
+      <section className="relative min-h-[65vh] flex flex-col justify-center items-center overflow-hidden">
+        {/* Background Video */}
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+        >
+          <source src="/logistics2.mp4" type="video/mp4" />
+        </video>
+
+        {/* Premium blend overlays */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0A0F24]/90 via-[#001CB0]/80 to-[#0025E0]/75 mix-blend-multiply" />
+        <div className="absolute inset-0 bg-[#0A0F24]/40" />
+
         {/* Dot grid pattern */}
         <div
-          className="absolute inset-0 opacity-[0.12]"
+          className="absolute inset-0 opacity-[0.08]"
           style={{
             backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)',
             backgroundSize: '28px 28px',
           }}
         />
         {/* Orange glow orb */}
-        <div className="absolute top-[-80px] right-[-60px] w-[500px] h-[500px] rounded-full bg-[#E66423] opacity-[0.15] blur-[100px] pointer-events-none" />
+        <div className="absolute top-[-80px] right-[-60px] w-[500px] h-[500px] rounded-full bg-[#E66423] opacity-[0.2] blur-[100px] pointer-events-none" />
         {/* Blue glow orb bottom-left */}
-        <div className="absolute bottom-[-100px] left-[-80px] w-[400px] h-[400px] rounded-full bg-[#001CB0] opacity-25 blur-[80px] pointer-events-none" />
+        <div className="absolute bottom-[-100px] left-[-80px] w-[400px] h-[400px] rounded-full bg-[#001CB0] opacity-[0.15] blur-[80px] pointer-events-none" />
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 py-28 md:py-36 flex flex-col items-center justify-center text-center w-full">
           {/* Badge */}
