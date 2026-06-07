@@ -13,18 +13,35 @@ export async function POST(req: NextRequest, { params }: Params) {
   }
 
   try {
+    // Count existing invited candidates to enforce the limit of 20
+    const existingInvites = await execute<{ cnt: number }>(`
+      SELECT COUNT(*) AS cnt FROM Applications WHERE JobID = ? AND ApplicationStatus = 'interview_invited'
+    `, [jobId]);
+    const currentInvitedCount = existingInvites[0]?.cnt ?? 0;
+
+    if (currentInvitedCount >= 20) {
+      return NextResponse.json({
+        success: false,
+        message: 'The maximum limit of 20 interview invitations has already been reached for this job.',
+      });
+    }
+
+    const remainingCapacity = 20 - currentInvitedCount;
+
     // 1. Find all applications for this job that have an ATS score >= 80
     // and whose status is NOT already 'interview_invited', 'rejected', or 'hired'
+    // Order by score DESC so we invite the highest scoring candidates first
     interface EligibleApp {
       ApplicationID: number;
       ApplicantID: number;
       FullName: string;
       Email: string;
       JobTitle: string;
+      FinalScore: number;
     }
 
     const eligibleApps = await execute<EligibleApp>(`
-      SELECT a.ApplicationID, a.ApplicantID, ap.FullName, ap.Email, j.Title as JobTitle
+      SELECT a.ApplicationID, a.ApplicantID, ap.FullName, ap.Email, j.Title as JobTitle, ats.FinalScore
       FROM Applications a
       JOIN Applicants ap ON ap.ApplicantID = a.ApplicantID
       JOIN Jobs j ON j.JobID = a.JobID
@@ -32,14 +49,17 @@ export async function POST(req: NextRequest, { params }: Params) {
       WHERE a.JobID = ?
         AND ats.FinalScore >= 80
         AND a.ApplicationStatus IN ('pending', 'hr_review', 'scoring', 'scored')
+      ORDER BY ats.FinalScore DESC
     `, [jobId]);
 
     if (eligibleApps.length === 0) {
       return NextResponse.json({ success: false, message: 'No eligible top candidates to invite.' });
     }
 
+    const appsToInvite = eligibleApps.slice(0, remainingCapacity);
+
     // 2. Perform bulk updates and inserts
-    for (const app of eligibleApps) {
+    for (const app of appsToInvite) {
       // Update Application status to 'interview_invited'
       await execute(
         "UPDATE Applications SET ApplicationStatus = 'interview_invited' WHERE ApplicationID = ?",
@@ -79,8 +99,8 @@ export async function POST(req: NextRequest, { params }: Params) {
 
     return NextResponse.json({
       success: true,
-      invitedCount: eligibleApps.length,
-      message: `Successfully invited ${eligibleApps.length} candidates.`,
+      invitedCount: appsToInvite.length,
+      message: `Successfully invited ${appsToInvite.length} candidates.`,
     });
   } catch (error) {
     console.error('[POST /api/jobs/:id/bulk-invite]', error);

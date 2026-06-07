@@ -51,7 +51,7 @@ export default function TopCandidatesQueue({ jobId, applications }: Props) {
       });
       const data = await res.json();
       if (data.success) {
-        setSuccessMessage(`Successfully sent interview invites to all ${queue.length} top candidates!`);
+        setSuccessMessage(`Successfully sent interview invites to ${data.invitedCount} top candidates!`);
         setTimeout(() => {
           setSuccessMessage(null);
           router.refresh();

@@ -470,10 +470,26 @@ async function processApplication(applicationId) {
     ].join('; ');
   }
 
+  // Query number of current interview invited applicants for this job
+  const invitedCountRows = await dbQuery(`
+    SELECT COUNT(*) AS count 
+    FROM Applications 
+    WHERE JobID = ? AND ApplicationStatus = 'interview_invited'
+  `, [JobID]);
+  const invitedCount = invitedCountRows[0]?.count ?? 0;
+
   // Map recommendation to next database application status
   let nextStatus = 'hr_review';
+  let isAutoInvited = false;
+
   if (recommendation === 'fast_track' || recommendation === 'auto_invite') {
-    nextStatus = 'interview_invited';
+    if (invitedCount < 20) {
+      nextStatus = 'interview_invited';
+      isAutoInvited = true;
+    } else {
+      nextStatus = 'hr_review';
+      console.log(`[Worker] Candidate qualified with score ${finalScore}% but limit of 20 interview invitations is reached for JobID ${JobID}. Setting status to 'hr_review'.`);
+    }
   } else if (recommendation === 'auto_reject') {
     nextStatus = 'rejected';
   } else {
@@ -511,10 +527,41 @@ async function processApplication(applicationId) {
     WHERE ApplicationID = ?
   `, [nextStatus, parseInt(applicationId)]);
 
+  // If candidate is auto-invited, insert an Interview Invitation record
+  if (isAutoInvited) {
+    const existingInvite = await dbQuery(`
+      SELECT InvitationID FROM InterviewInvitations WHERE ApplicationID = ?
+    `, [parseInt(applicationId)]);
+
+    if (existingInvite.length === 0) {
+      await dbQuery(`
+        INSERT INTO InterviewInvitations (
+          ApplicationID, InterviewDate, InterviewType, MeetingLink, InvitationSent, CreatedDate
+        ) VALUES (?, DATEADD(day, 3, GETDATE()), 'Video Call', 'https://meet.google.com/rie-agl-interview', 1, GETDATE())
+      `, [parseInt(applicationId)]);
+      console.log(`[Worker] Created interview invitation record for application ID ${applicationId}.`);
+    }
+  }
+
   console.log(`[Worker] Evaluation completed. Score: ${finalScore}%, Recommendation: ${recommendation}, Next Status: ${nextStatus}`);
 
   // 9. Send Email Notification (uses SMTP if configured, falls back to logging)
-  if (nextStatus === 'rejected') {
+  if (isAutoInvited) {
+    const emailText = 
+      `Dear ${FullName},\n\n` +
+      `Congratulations! Based on our automated CV screening and analysis, we would love to invite you for a Video Interview for the ${JobTitle} position.\n\n` +
+      `Please use the link below to join your interview:\n` +
+      `Meeting Link: https://meet.google.com/rie-agl-interview\n\n` +
+      `Best regards,\n` +
+      `HR Recruitment Team\n` +
+      `RIE-AGL Careers`;
+
+    await sendWorkerEmail({
+      to: Email,
+      subject: `Interview Invitation: ${FullName} for ${JobTitle} at RIE-AGL`,
+      text: emailText,
+    });
+  } else if (nextStatus === 'rejected') {
     const rejectionText =
       `Dear ${FullName},\n\n` +
       `Thank you for your interest in the ${JobTitle} position at RIE-AGL Careers and for taking the time to submit your CV.\n\n` +
