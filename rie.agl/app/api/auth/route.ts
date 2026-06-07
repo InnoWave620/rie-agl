@@ -12,6 +12,7 @@ interface DBUser {
   Department: string | null;
   IsActive: boolean | number;
   PasswordHash: string | null;
+  AvatarUrl?: string | null;
 }
 
 function mapRole(roleName: string): AuthSession['role'] {
@@ -41,7 +42,7 @@ export async function POST(req: NextRequest) {
 
     // Fetch user from DB
     const rows = await query<DBUser>(`
-      SELECT UserID, FullName, Email, RoleName, Department, IsActive, PasswordHash
+      SELECT UserID, FullName, Email, RoleName, Department, IsActive, PasswordHash, AvatarUrl
       FROM Users
       WHERE Email = ${esc(email.trim().toLowerCase())}
     `);
@@ -87,6 +88,7 @@ export async function POST(req: NextRequest) {
       lastName:       nameParts.slice(1).join(' ') ?? '',
       role:           mapRole(user.RoleName),
       avatarInitials: initials(user.FullName),
+      avatarUrl:      user.AvatarUrl ?? undefined,
     };
 
     const token = await createToken(session);
