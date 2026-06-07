@@ -4,6 +4,26 @@ const fs = require('fs');
 const path = require('path');
 const { S3Client, GetObjectCommand } = require('@aws-sdk/client-s3');
 
+// Load environment variables from .env.local manually for the standalone Node process
+const envPath = path.join(__dirname, '..', '.env.local');
+if (fs.existsSync(envPath)) {
+  const envContent = fs.readFileSync(envPath, 'utf8');
+  envContent.split('\n').forEach(line => {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith('#')) {
+      const equalIndex = trimmed.indexOf('=');
+      if (equalIndex > 0) {
+        const key = trimmed.substring(0, equalIndex).trim();
+        const val = trimmed.substring(equalIndex + 1).trim();
+        // Only set if not already defined
+        if (process.env[key] === undefined) {
+          process.env[key] = val;
+        }
+      }
+    }
+  });
+}
+
 // ─── Redis Connection Configuration ───
 const redisHost = process.env.REDIS_HOST || '127.0.0.1';
 const redisPort = parseInt(process.env.REDIS_PORT || '6379');
