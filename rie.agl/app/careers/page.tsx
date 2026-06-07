@@ -172,6 +172,14 @@ export default function CareersPage() {
             ))}
           </div>
         </div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1.5 animate-bounce opacity-60 hover:opacity-100 transition-opacity duration-300">
+          <span className="text-white/50 text-xs font-bold tracking-widest uppercase">
+            Scroll down to see careers
+          </span>
+          <ChevronDown size={14} className="text-[#E66423]" />
+        </div>
       </section>
 
       {/* ── Filters + Jobs ── */}
