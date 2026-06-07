@@ -135,43 +135,46 @@ export default async function JobDetailPage({ params }: Props) {
   return (
     <>
       {/* Page Header */}
-      <div className="bg-white border-b border-[#E2E6EF] px-6 py-4 flex items-center justify-between gap-4 flex-wrap">
-        <div className="flex items-center gap-3">
-          <Link
-            href="/employer/jobs"
-            className="inline-flex items-center gap-1.5 text-sm text-[#535E75] hover:text-[#001CB0] font-medium transition-colors duration-200"
-          >
-            <ArrowLeft size={15} />
-            All Jobs
-          </Link>
-          <div className="h-5 w-px bg-[#E2E6EF]" />
-          <div>
-            <h1 className="text-xl font-bold text-[#0A0F24] truncate max-w-xs sm:max-w-lg">{job.title}</h1>
-            <p className="text-sm text-[#535E75] mt-0.5">
-              {job.location}{job.country ? `, ${job.country}` : ''} · {job.division} Division
-            </p>
+      <div className="bg-white border-b border-[#E2E6EF] px-6 py-4">
+        <div className="max-w-[1400px] mx-auto w-full flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/employer/jobs"
+              className="inline-flex items-center gap-1.5 text-sm text-[#535E75] hover:text-[#001CB0] font-medium transition-colors duration-200"
+            >
+              <ArrowLeft size={15} />
+              All Jobs
+            </Link>
+            <div className="h-5 w-px bg-[#E2E6EF]" />
+            <div>
+              <h1 className="text-xl font-bold text-[#0A0F24] truncate max-w-xs sm:max-w-lg">{job.title}</h1>
+              <p className="text-sm text-[#535E75] mt-0.5">
+                {job.location}{job.country ? `, ${job.country}` : ''} · {job.division} Division
+              </p>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link
-            href={`/careers/${job.id}`}
-            target="_blank"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[#E2E6EF] text-sm font-semibold text-[#0A0F24] bg-white hover:bg-[#F4F6F9] transition-all duration-200"
-          >
-            <ExternalLink size={14} />
-            View Public
-          </Link>
-          <Link
-            href={`/employer/jobs/${job.id}/edit`}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#001CB0] to-[#0025E0] text-white text-sm font-semibold shadow-sm hover:shadow-md hover:opacity-95 transition-all duration-200"
-          >
-            <Edit2 size={14} />
-            Edit Job
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/careers/${job.id}`}
+              target="_blank"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[#E2E6EF] text-sm font-semibold text-[#0A0F24] bg-white hover:bg-[#F4F6F9] transition-all duration-200"
+            >
+              <ExternalLink size={14} />
+              View Public
+            </Link>
+            <Link
+              href={`/employer/jobs/${job.id}/edit`}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#001CB0] to-[#0025E0] text-white text-sm font-semibold shadow-sm hover:shadow-md hover:opacity-95 transition-all duration-200"
+            >
+              <Edit2 size={14} />
+              Edit Job
+            </Link>
+          </div>
         </div>
       </div>
 
-      <main className="flex-1 p-6 overflow-auto bg-[#F4F6F9] space-y-6">
+      <main className="flex-1 p-6 overflow-auto bg-[#F4F6F9]">
+        <div className="max-w-[1400px] mx-auto w-full space-y-6">
 
         {/* Job Overview Card */}
         <div className="card p-6">
@@ -305,6 +308,7 @@ export default async function JobDetailPage({ params }: Props) {
               </table>
             </div>
           )}
+        </div>
         </div>
       </main>
     </>

@@ -63,21 +63,24 @@ export default function JobsPage() {
   return (
     <>
       {/* Page Header */}
-      <div className="bg-white border-b border-[#E2E6EF] px-8 py-5 flex items-center justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-xl font-bold text-[#0A0F24]">Job Management</h1>
-          <p className="text-sm text-[#535E75] mt-0.5">Create and manage your job postings</p>
+      <div className="bg-white border-b border-[#E2E6EF] px-8 py-5">
+        <div className="max-w-[1400px] mx-auto w-full flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-xl font-bold text-[#0A0F24]">Job Management</h1>
+            <p className="text-sm text-[#535E75] mt-0.5">Create and manage your job postings</p>
+          </div>
+          <Link
+            href="/employer/jobs/new"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#001CB0] to-[#0025E0] text-white text-sm font-semibold shadow-sm hover:shadow-md hover:opacity-95 transition-all duration-200"
+          >
+            <Plus size={15} />
+            New Job
+          </Link>
         </div>
-        <Link
-          href="/employer/jobs/new"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#001CB0] to-[#0025E0] text-white text-sm font-semibold shadow-sm hover:shadow-md hover:opacity-95 transition-all duration-200"
-        >
-          <Plus size={15} />
-          New Job
-        </Link>
       </div>
 
       <main className="flex-1 p-8 overflow-auto bg-[#F4F6F9]">
+        <div className="max-w-[1400px] mx-auto w-full">
         {/* Toolbar */}
         <div className="flex flex-wrap items-center gap-4 mb-8">
           {/* Status Tabs */}
@@ -227,6 +230,7 @@ export default function JobsPage() {
             </Link>
           </div>
         )}
+        </div>
       </main>
     </>
   );

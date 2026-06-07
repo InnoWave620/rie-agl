@@ -63,31 +63,34 @@ export default function NewJobPage() {
   return (
     <>
       {/* Page Header */}
-      <div className="bg-white border-b border-[#E2E6EF] px-6 py-4 flex items-center gap-4">
-        <Link
-          href="/employer/jobs"
-          className="inline-flex items-center gap-1.5 text-sm text-[#535E75] hover:text-[#001CB0] font-medium transition-colors duration-200"
-        >
-          <ArrowLeft size={15} />
-          Back to Jobs
-        </Link>
-        <div className="h-5 w-px bg-[#E2E6EF]" />
-        <div>
-          <h1 className="text-xl font-bold text-[#0A0F24]">Create Job Posting</h1>
-          <p className="text-sm text-[#535E75] mt-0.5">Fill in the details to post a new position</p>
+      <div className="bg-white border-b border-[#E2E6EF] px-6 py-4">
+        <div className="max-w-[1400px] mx-auto w-full flex items-center gap-4">
+          <Link
+            href="/employer/jobs"
+            className="inline-flex items-center gap-1.5 text-sm text-[#535E75] hover:text-[#001CB0] font-medium transition-colors duration-200"
+          >
+            <ArrowLeft size={15} />
+            Back to Jobs
+          </Link>
+          <div className="h-5 w-px bg-[#E2E6EF]" />
+          <div>
+            <h1 className="text-xl font-bold text-[#0A0F24]">Create Job Posting</h1>
+            <p className="text-sm text-[#535E75] mt-0.5">Fill in the details to post a new position</p>
+          </div>
         </div>
       </div>
 
       <main className="flex-1 overflow-auto bg-[#F4F6F9]">
-        {/* Success Banner */}
-        {saved && (
-          <div className="mx-6 mt-6 p-4 rounded-2xl bg-green-50 border border-green-200 flex items-center gap-3 animate-scale-in">
-            <CheckCircle size={18} className="text-green-600 shrink-0" />
-            <span className="text-sm font-semibold text-green-700">Job saved successfully! Redirecting…</span>
-          </div>
-        )}
+        <div className="max-w-[1400px] mx-auto w-full">
+          {/* Success Banner */}
+          {saved && (
+            <div className="mx-6 mt-6 p-4 rounded-2xl bg-green-50 border border-green-200 flex items-center gap-3 animate-scale-in">
+              <CheckCircle size={18} className="text-green-600 shrink-0" />
+              <span className="text-sm font-semibold text-green-700">Job saved successfully! Redirecting…</span>
+            </div>
+          )}
 
-        <div className="p-6">
+          <div className="p-6">
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
             {/* ── Main Form (left 2/3) ── */}
             <div className="xl:col-span-2 space-y-6">
@@ -255,6 +258,7 @@ export default function NewJobPage() {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </main>
     </>

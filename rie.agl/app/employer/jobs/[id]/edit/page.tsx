@@ -125,28 +125,32 @@ export default function EditJobPage({ params }: Props) {
     return (
       <>
         <div className="bg-white border-b border-[#E2E6EF] px-6 py-4">
-          <h1 className="text-xl font-bold text-[#0A0F24]">Edit Job</h1>
-          <p className="text-sm text-[#535E75] mt-0.5">Loading…</p>
+          <div className="max-w-[1400px] mx-auto w-full">
+            <h1 className="text-xl font-bold text-[#0A0F24]">Edit Job</h1>
+            <p className="text-sm text-[#535E75] mt-0.5">Loading…</p>
+          </div>
         </div>
         <main className="flex-1 p-6 bg-[#F4F6F9]">
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            <div className="xl:col-span-2 space-y-6">
-              {[200, 300, 180].map((h, i) => (
-                <div key={i} className="bg-white rounded-2xl border border-[#E2E6EF] shadow-sm p-6 animate-pulse">
-                  <div className="h-4 bg-[#E2E6EF] rounded-lg w-1/3 mb-5" />
-                  <div className="space-y-4">
-                    <div className="h-10 bg-[#E2E6EF] rounded-xl" />
-                    <div className="h-10 bg-[#E2E6EF] rounded-xl" />
-                    <div style={{ height: h }} className="bg-[#E2E6EF] rounded-xl" />
+          <div className="max-w-[1400px] mx-auto w-full">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+              <div className="xl:col-span-2 space-y-6">
+                {[200, 300, 180].map((h, i) => (
+                  <div key={i} className="bg-white rounded-2xl border border-[#E2E6EF] shadow-sm p-6 animate-pulse">
+                    <div className="h-4 bg-[#E2E6EF] rounded-lg w-1/3 mb-5" />
+                    <div className="space-y-4">
+                      <div className="h-10 bg-[#E2E6EF] rounded-xl" />
+                      <div className="h-10 bg-[#E2E6EF] rounded-xl" />
+                      <div style={{ height: h }} className="bg-[#E2E6EF] rounded-xl" />
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-            <div className="space-y-5">
-              <div className="bg-white rounded-2xl border border-[#E2E6EF] shadow-sm p-5 animate-pulse space-y-4">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="h-10 bg-[#E2E6EF] rounded-xl" />
                 ))}
+              </div>
+              <div className="space-y-5">
+                <div className="bg-white rounded-2xl border border-[#E2E6EF] shadow-sm p-5 animate-pulse space-y-4">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={i} className="h-10 bg-[#E2E6EF] rounded-xl" />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -159,10 +163,12 @@ export default function EditJobPage({ params }: Props) {
     return (
       <>
         <div className="bg-white border-b border-[#E2E6EF] px-6 py-4">
-          <h1 className="text-xl font-bold text-[#0A0F24]">Not Found</h1>
+          <div className="max-w-[1400px] mx-auto w-full">
+            <h1 className="text-xl font-bold text-[#0A0F24]">Not Found</h1>
+          </div>
         </div>
         <main className="flex-1 flex items-center justify-center bg-[#F4F6F9]">
-          <div className="text-center">
+          <div className="text-center max-w-[1400px] mx-auto w-full">
             <div className="w-20 h-20 rounded-2xl bg-[#F4F6F9] border border-[#E2E6EF] flex items-center justify-center mx-auto mb-4 text-3xl">❌</div>
             <h3 className="text-lg font-bold text-[#0A0F24] mb-2">Job not found</h3>
             <Link
@@ -180,41 +186,44 @@ export default function EditJobPage({ params }: Props) {
   return (
     <>
       {/* Page Header */}
-      <div className="bg-white border-b border-[#E2E6EF] px-6 py-4 flex items-center gap-4">
-        <Link
-          href={`/employer/jobs/${id}`}
-          className="inline-flex items-center gap-1.5 text-sm text-[#535E75] hover:text-[#001CB0] font-medium transition-colors duration-200"
-        >
-          <ArrowLeft size={15} />
-          Back to Job
-        </Link>
-        <div className="h-5 w-px bg-[#E2E6EF]" />
-        <div>
-          <h1 className="text-xl font-bold text-[#0A0F24] truncate max-w-md">
-            Edit: {form.title || 'Job'}
-          </h1>
-          <p className="text-sm text-[#535E75] mt-0.5">Update the job posting details</p>
+      <div className="bg-white border-b border-[#E2E6EF] px-6 py-4">
+        <div className="max-w-[1400px] mx-auto w-full flex items-center gap-4">
+          <Link
+            href={`/employer/jobs/${id}`}
+            className="inline-flex items-center gap-1.5 text-sm text-[#535E75] hover:text-[#001CB0] font-medium transition-colors duration-200"
+          >
+            <ArrowLeft size={15} />
+            Back to Job
+          </Link>
+          <div className="h-5 w-px bg-[#E2E6EF]" />
+          <div>
+            <h1 className="text-xl font-bold text-[#0A0F24] truncate max-w-md">
+              Edit: {form.title || 'Job'}
+            </h1>
+            <p className="text-sm text-[#535E75] mt-0.5">Update the job posting details</p>
+          </div>
         </div>
       </div>
 
       <main className="flex-1 overflow-auto bg-[#F4F6F9]">
-        {/* Toast */}
-        {toast && (
-          <div className={`mx-6 mt-6 p-4 rounded-2xl flex items-center gap-3 animate-scale-in ${
-            toast.type === 'success'
-              ? 'bg-green-50 border border-green-200'
-              : 'bg-red-50 border border-red-200'
-          }`}>
-            {toast.type === 'success'
-              ? <CheckCircle size={16} className="text-green-600 shrink-0" />
-              : <AlertCircle size={16} className="text-red-500 shrink-0" />}
-            <span className={`text-sm font-semibold ${toast.type === 'success' ? 'text-green-700' : 'text-red-700'}`}>
-              {toast.msg}
-            </span>
-          </div>
-        )}
+        <div className="max-w-[1400px] mx-auto w-full">
+          {/* Toast */}
+          {toast && (
+            <div className={`mx-6 mt-6 p-4 rounded-2xl flex items-center gap-3 animate-scale-in ${
+              toast.type === 'success'
+                ? 'bg-green-50 border border-green-200'
+                : 'bg-red-50 border border-red-200'
+            }`}>
+              {toast.type === 'success'
+                ? <CheckCircle size={16} className="text-green-600 shrink-0" />
+                : <AlertCircle size={16} className="text-red-500 shrink-0" />}
+              <span className={`text-sm font-semibold ${toast.type === 'success' ? 'text-green-700' : 'text-red-700'}`}>
+                {toast.msg}
+              </span>
+            </div>
+          )}
 
-        <div className="p-6">
+          <div className="p-6">
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
             {/* ── Main Form ── */}
             <div className="xl:col-span-2 space-y-6">
@@ -379,6 +388,7 @@ export default function EditJobPage({ params }: Props) {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </main>
     </>

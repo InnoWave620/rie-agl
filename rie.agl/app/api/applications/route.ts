@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '../../lib/db';
+import { query, execute } from '../../lib/db';
+import { uploadCV } from '../../lib/s3';
+import { addApplicationJob } from '../../lib/queue';
 
 interface DBApp {
   ApplicationID: number; ApplicantID: number; JobID: number;
@@ -86,6 +88,8 @@ export async function POST(req: NextRequest) {
     const firstName    = formData.get('firstName')    as string;
     const lastName     = formData.get('lastName')     as string;
     const email        = formData.get('email')        as string;
+    const phone        = (formData.get('phone')       as string) || null;
+    const location     = (formData.get('location')    as string) || null;
     const consentGiven = formData.get('consentGiven') === 'true';
     const resumeFile   = formData.get('resume')       as File | null;
 
@@ -96,16 +100,67 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Resume file is required' }, { status: 400 });
     }
 
+    const emailLower = email.trim().toLowerCase();
+    const fullName = `${firstName.trim()} ${lastName.trim()}`;
+
+    // 1. Look up or insert candidate in Applicants
+    const existing = await execute<{ ApplicantID: number }>(
+      'SELECT ApplicantID FROM Applicants WHERE Email = ?',
+      [emailLower]
+    );
+
+    let applicantId: number;
+    if (existing.length > 0) {
+      applicantId = existing[0].ApplicantID;
+      await execute(
+        'UPDATE Applicants SET FullName = ?, Phone = ?, Location = ? WHERE ApplicantID = ?',
+        [fullName, phone, location, applicantId]
+      );
+    } else {
+      const inserted = await execute<{ ApplicantID: number }>(
+        `INSERT INTO Applicants (FullName, Email, Phone, Location, CreatedDate)
+         OUTPUT INSERTED.ApplicantID
+         VALUES (?, ?, ?, ?, GETDATE())`,
+        [fullName, emailLower, phone, location]
+      );
+      applicantId = inserted[0].ApplicantID;
+    }
+
+    // 2. Upload file buffer to AWS S3 (AES-256 encrypted)
+    const arrayBuffer = await resumeFile.arrayBuffer();
+    const fileBuffer = Buffer.from(arrayBuffer);
+    const s3Url = await uploadCV(fileBuffer, resumeFile.name, resumeFile.type);
+
+    // 3. Write resume record to Resumes table
+    await execute('DELETE FROM Resumes WHERE ApplicantID = ?', [applicantId]);
+    await execute(
+      'INSERT INTO Resumes (ApplicantID, CVUrl, FileName, UploadedDate) VALUES (?, ?, ?, GETDATE())',
+      [applicantId, s3Url, resumeFile.name]
+    );
+
+    // 4. Create new Application record
+    const appRows = await execute<{ ApplicationID: number }>(
+      `INSERT INTO Applications (ApplicantID, JobID, ApplicationStatus, CreatedDate)
+       OUTPUT INSERTED.ApplicationID
+       VALUES (?, ?, 'pending', GETDATE())`,
+      [applicantId, parseInt(jobId)]
+    );
+    const applicationId = appRows[0].ApplicationID;
+
+    // 5. Dispatch background AI assessment job via BullMQ queue
+    await addApplicationJob(String(applicationId));
+
     return NextResponse.json({
       success: true,
       data: {
-        applicationId: `app-${Date.now()}`,
+        applicationId: String(applicationId),
         status: 'pending',
         message: 'Application received. You will receive a confirmation email shortly.',
         estimatedReviewTime: '2-3 business days',
       },
     }, { status: 201 });
-  } catch {
-    return NextResponse.json({ success: false, error: 'Server error' }, { status: 500 });
+  } catch (error) {
+    console.error('[POST /api/applications] Submission failed:', error);
+    return NextResponse.json({ success: false, error: 'Server error: ' + String(error) }, { status: 500 });
   }
 }

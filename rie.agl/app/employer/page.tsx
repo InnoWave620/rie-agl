@@ -402,244 +402,246 @@ export default function EmployerDashboard() {
         }
       />
 
-      <main className="flex-1 p-6 sm:p-8 space-y-8 overflow-auto bg-[#F4F6F9]">
-        {/* ── KPI Stat Cards ──────────────────────────────────────── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-          {loading
-            ? [0, 1, 2, 3].map((i) => <SkeletonStatCard key={i} />)
-            : stats.map((s) => <StatCard key={s.label} {...s} />)}
-        </div>
+      <main className="flex-1 p-6 sm:p-8 overflow-auto bg-[#F4F6F9]">
+        <div className="max-w-[1400px] mx-auto space-y-8 w-full">
+          {/* ── KPI Stat Cards ──────────────────────────────────────── */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+            {loading
+              ? [0, 1, 2, 3].map((i) => <SkeletonStatCard key={i} />)
+              : stats.map((s) => <StatCard key={s.label} {...s} />)}
+          </div>
 
-        {/* ── Middle row: Applications table + Pipeline ────────────── */}
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-          {/* Recent Applications */}
+          {/* ── Middle row: Applications table + Pipeline ────────────── */}
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+            {/* Recent Applications */}
+            <div
+              className="card xl:col-span-2 overflow-hidden animate-fade-in-up"
+              style={{ animationDelay: '0.28s', opacity: 0 }}
+            >
+              {/* header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-[#F4F6F9]">
+                <div>
+                  <h2 className="font-bold text-[#0A0F24]">Recent Applications</h2>
+                  <p className="text-xs mt-0.5 text-[#535E75]">
+                    Latest candidate activity
+                  </p>
+                </div>
+                <Link
+                  href="/employer/jobs"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#E66423]
+                             hover:text-[#c8501a] transition-colors"
+                >
+                  View all <ArrowRight size={12} />
+                </Link>
+              </div>
+
+              {/* table */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-[#F4F6F9]">
+                      {['Candidate', 'Position', 'ATS Score', 'Status', 'Applied'].map(
+                        (h) => (
+                          <th
+                            key={h}
+                            className="px-5 py-3 text-left text-xs font-semibold text-[#535E75] uppercase tracking-wide whitespace-nowrap"
+                          >
+                            {h}
+                          </th>
+                        )
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#F4F6F9]">
+                    {loading ? (
+                      [0, 1, 2, 3, 4].map((i) => <SkeletonRow key={i} />)
+                    ) : recentApps.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={5}
+                          className="px-5 py-12 text-center text-sm text-[#535E75]"
+                        >
+                          No applications yet.
+                        </td>
+                      </tr>
+                    ) : (
+                      recentApps.map((app, i) => (
+                        <tr
+                          key={app.id}
+                          className="hover:bg-[#F4F6F9]/60 transition-colors animate-fade-in-up"
+                          style={{ animationDelay: `${0.3 + i * 0.05}s`, opacity: 0 }}
+                        >
+                          {/* candidate */}
+                          <td className="px-5 py-3.5 whitespace-nowrap">
+                            <div className="flex items-center gap-3">
+                              <Avatar
+                                firstName={app.candidate.firstName}
+                                lastName={app.candidate.lastName}
+                              />
+                              <div>
+                                <div className="font-semibold text-[#0A0F24]">
+                                  {app.candidate.firstName} {app.candidate.lastName}
+                                </div>
+                                <div className="text-xs text-[#535E75]">
+                                  {app.candidate.email}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* position */}
+                          <td className="px-5 py-3.5 whitespace-nowrap">
+                            <span className="font-medium text-[#0A0F24]">
+                              {app.jobTitle ??
+                                jobs.find((j) => j.id === app.jobId)?.title ??
+                                '—'}
+                            </span>
+                          </td>
+
+                          {/* ATS score */}
+                          <td className="px-5 py-3.5 whitespace-nowrap">
+                            {app.atsScore != null ? (
+                              <span
+                                className={getScoreBadgeClass(
+                                  app.decisionCategory as never
+                                )}
+                              >
+                                {Number(app.atsScore).toFixed(1)}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-[#535E75]">Pending</span>
+                            )}
+                          </td>
+
+                          {/* status */}
+                          <td className="px-5 py-3.5 whitespace-nowrap">
+                            <span className={getStatusClass(app.status as never)}>
+                              {getStatusLabel(app.status as never)}
+                            </span>
+                          </td>
+
+                          {/* time */}
+                          <td className="px-5 py-3.5 whitespace-nowrap text-xs text-[#535E75]">
+                            {formatRelativeTime(app.createdAt)}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Pipeline Snapshot */}
+            <div
+              className="card overflow-hidden flex flex-col animate-fade-in-up"
+              style={{ animationDelay: '0.35s', opacity: 0 }}
+            >
+              <div className="px-5 py-4 border-b border-[#F4F6F9]">
+                <h2 className="font-bold text-[#0A0F24]">Pipeline Snapshot</h2>
+                <p className="text-xs mt-0.5 text-[#535E75]">Current funnel health</p>
+              </div>
+
+              <div className="p-5 space-y-5 flex-1">
+                {loading
+                  ? [0, 1, 2, 3].map((i) => (
+                      <div key={i} className="space-y-1.5">
+                        <div className="flex justify-between">
+                          <Pulse className="w-24 h-4" />
+                          <Pulse className="w-10 h-4" />
+                        </div>
+                        <Pulse className="w-full h-2 rounded-full" />
+                      </div>
+                    ))
+                  : (analytics?.pipelineFunnel ?? []).map((stage) => (
+                      <PipelineBar
+                        key={stage.stage}
+                        stage={stage.stage}
+                        count={stage.count}
+                        pct={stage.pct}
+                        color={stage.color}
+                      />
+                    ))}
+              </div>
+
+              <div className="px-5 pb-5">
+                <Link
+                  href="/employer/analytics"
+                  className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg
+                             border-2 border-[#001CB0] text-[#001CB0] text-sm font-semibold
+                             hover:bg-[#001CB0] hover:text-white transition-all duration-200"
+                >
+                  <BarChart3 size={15} />
+                  Full Analytics
+                </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Active Jobs – horizontal scroll ─────────────────────── */}
           <div
-            className="card xl:col-span-2 overflow-hidden animate-fade-in-up"
-            style={{ animationDelay: '0.28s', opacity: 0 }}
+            className="card overflow-hidden animate-fade-in-up"
+            style={{ animationDelay: '0.42s', opacity: 0 }}
           >
             {/* header */}
             <div className="flex items-center justify-between px-5 py-4 border-b border-[#F4F6F9]">
               <div>
-                <h2 className="font-bold text-[#0A0F24]">Recent Applications</h2>
+                <h2 className="font-bold text-[#0A0F24]">Active Job Postings</h2>
                 <p className="text-xs mt-0.5 text-[#535E75]">
-                  Latest candidate activity
+                  {loading ? '…' : `${published.length} published positions`}
                 </p>
               </div>
               <Link
-                href="/employer/jobs"
-                className="inline-flex items-center gap-1 text-xs font-semibold text-[#E66423]
-                           hover:text-[#c8501a] transition-colors"
+                href="/employer/jobs/new"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg
+                           bg-[#001CB0] text-white text-xs font-semibold
+                           hover:bg-[#0025d4] transition-colors shadow-sm"
               >
-                View all <ArrowRight size={12} />
+                <Plus size={13} />
+                Post Job
               </Link>
             </div>
 
-            {/* table */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-[#F4F6F9]">
-                    {['Candidate', 'Position', 'ATS Score', 'Status', 'Applied'].map(
-                      (h) => (
-                        <th
-                          key={h}
-                          className="px-5 py-3 text-left text-xs font-semibold text-[#535E75] uppercase tracking-wide whitespace-nowrap"
-                        >
-                          {h}
-                        </th>
-                      )
-                    )}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#F4F6F9]">
-                  {loading ? (
-                    [0, 1, 2, 3, 4].map((i) => <SkeletonRow key={i} />)
-                  ) : recentApps.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan={5}
-                        className="px-5 py-12 text-center text-sm text-[#535E75]"
-                      >
-                        No applications yet.
-                      </td>
-                    </tr>
-                  ) : (
-                    recentApps.map((app, i) => (
-                      <tr
-                        key={app.id}
-                        className="hover:bg-[#F4F6F9]/60 transition-colors animate-fade-in-up"
-                        style={{ animationDelay: `${0.3 + i * 0.05}s`, opacity: 0 }}
-                      >
-                        {/* candidate */}
-                        <td className="px-5 py-3.5 whitespace-nowrap">
-                          <div className="flex items-center gap-3">
-                            <Avatar
-                              firstName={app.candidate.firstName}
-                              lastName={app.candidate.lastName}
-                            />
-                            <div>
-                              <div className="font-semibold text-[#0A0F24]">
-                                {app.candidate.firstName} {app.candidate.lastName}
-                              </div>
-                              <div className="text-xs text-[#535E75]">
-                                {app.candidate.email}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* position */}
-                        <td className="px-5 py-3.5 whitespace-nowrap">
-                          <span className="font-medium text-[#0A0F24]">
-                            {app.jobTitle ??
-                              jobs.find((j) => j.id === app.jobId)?.title ??
-                              '—'}
-                          </span>
-                        </td>
-
-                        {/* ATS score */}
-                        <td className="px-5 py-3.5 whitespace-nowrap">
-                          {app.atsScore != null ? (
-                            <span
-                              className={getScoreBadgeClass(
-                                app.decisionCategory as never
-                              )}
-                            >
-                              {Number(app.atsScore).toFixed(1)}
-                            </span>
-                          ) : (
-                            <span className="text-xs text-[#535E75]">Pending</span>
-                          )}
-                        </td>
-
-                        {/* status */}
-                        <td className="px-5 py-3.5 whitespace-nowrap">
-                          <span className={getStatusClass(app.status as never)}>
-                            {getStatusLabel(app.status as never)}
-                          </span>
-                        </td>
-
-                        {/* time */}
-                        <td className="px-5 py-3.5 whitespace-nowrap text-xs text-[#535E75]">
-                          {formatRelativeTime(app.createdAt)}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Pipeline Snapshot */}
-          <div
-            className="card overflow-hidden flex flex-col animate-fade-in-up"
-            style={{ animationDelay: '0.35s', opacity: 0 }}
-          >
-            <div className="px-5 py-4 border-b border-[#F4F6F9]">
-              <h2 className="font-bold text-[#0A0F24]">Pipeline Snapshot</h2>
-              <p className="text-xs mt-0.5 text-[#535E75]">Current funnel health</p>
-            </div>
-
-            <div className="p-5 space-y-5 flex-1">
-              {loading
-                ? [0, 1, 2, 3].map((i) => (
-                    <div key={i} className="space-y-1.5">
-                      <div className="flex justify-between">
-                        <Pulse className="w-24 h-4" />
-                        <Pulse className="w-10 h-4" />
-                      </div>
-                      <Pulse className="w-full h-2 rounded-full" />
-                    </div>
-                  ))
-                : (analytics?.pipelineFunnel ?? []).map((stage) => (
-                    <PipelineBar
-                      key={stage.stage}
-                      stage={stage.stage}
-                      count={stage.count}
-                      pct={stage.pct}
-                      color={stage.color}
-                    />
+            {/* scrollable cards */}
+            <div className="px-5 py-5 overflow-x-auto">
+              {loading ? (
+                <div className="flex gap-5 pb-1">
+                  {[0, 1, 2, 3].map((i) => (
+                    <SkeletonJobCard key={i} />
                   ))}
+                </div>
+              ) : jobs.length === 0 ? (
+                <p className="text-sm text-center py-8 text-[#535E75]">
+                  No jobs yet.{' '}
+                  <Link
+                    href="/employer/jobs/new"
+                    className="text-[#001CB0] font-semibold hover:underline"
+                  >
+                    Post your first role →
+                  </Link>
+                </p>
+              ) : (
+                <div className="flex gap-5 pb-1">
+                  {jobs.map((job, i) => (
+                    <JobCard key={job.id} job={job} delay={0.44 + i * 0.05} />
+                  ))}
+
+                  {/* "See all" faux card */}
+                  <Link
+                    href="/employer/jobs"
+                    className="flex-shrink-0 w-40 bg-[#F4F6F9] rounded-xl border-2 border-dashed
+                               border-[#E2E6EF] flex flex-col items-center justify-center gap-2
+                               text-[#535E75] hover:border-[#001CB0] hover:text-[#001CB0]
+                               transition-colors p-4"
+                  >
+                    <ChevronRight size={20} />
+                    <span className="text-xs font-semibold text-center">
+                      See all jobs
+                    </span>
+                  </Link>
+                </div>
+              )}
             </div>
-
-            <div className="px-5 pb-5">
-              <Link
-                href="/employer/analytics"
-                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg
-                           border-2 border-[#001CB0] text-[#001CB0] text-sm font-semibold
-                           hover:bg-[#001CB0] hover:text-white transition-all duration-200"
-              >
-                <BarChart3 size={15} />
-                Full Analytics
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Active Jobs – horizontal scroll ─────────────────────── */}
-        <div
-          className="card overflow-hidden animate-fade-in-up"
-          style={{ animationDelay: '0.42s', opacity: 0 }}
-        >
-          {/* header */}
-          <div className="flex items-center justify-between px-5 py-4 border-b border-[#F4F6F9]">
-            <div>
-              <h2 className="font-bold text-[#0A0F24]">Active Job Postings</h2>
-              <p className="text-xs mt-0.5 text-[#535E75]">
-                {loading ? '…' : `${published.length} published positions`}
-              </p>
-            </div>
-            <Link
-              href="/employer/jobs/new"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg
-                         bg-[#001CB0] text-white text-xs font-semibold
-                         hover:bg-[#0025d4] transition-colors shadow-sm"
-            >
-              <Plus size={13} />
-              Post Job
-            </Link>
-          </div>
-
-          {/* scrollable cards */}
-          <div className="px-5 py-5 overflow-x-auto">
-            {loading ? (
-              <div className="flex gap-5 pb-1">
-                {[0, 1, 2, 3].map((i) => (
-                  <SkeletonJobCard key={i} />
-                ))}
-              </div>
-            ) : jobs.length === 0 ? (
-              <p className="text-sm text-center py-8 text-[#535E75]">
-                No jobs yet.{' '}
-                <Link
-                  href="/employer/jobs/new"
-                  className="text-[#001CB0] font-semibold hover:underline"
-                >
-                  Post your first role →
-                </Link>
-              </p>
-            ) : (
-              <div className="flex gap-5 pb-1">
-                {jobs.map((job, i) => (
-                  <JobCard key={job.id} job={job} delay={0.44 + i * 0.05} />
-                ))}
-
-                {/* "See all" faux card */}
-                <Link
-                  href="/employer/jobs"
-                  className="flex-shrink-0 w-40 bg-[#F4F6F9] rounded-xl border-2 border-dashed
-                             border-[#E2E6EF] flex flex-col items-center justify-center gap-2
-                             text-[#535E75] hover:border-[#001CB0] hover:text-[#001CB0]
-                             transition-colors p-4"
-                >
-                  <ChevronRight size={20} />
-                  <span className="text-xs font-semibold text-center">
-                    See all jobs
-                  </span>
-                </Link>
-              </div>
-            )}
           </div>
         </div>
       </main>

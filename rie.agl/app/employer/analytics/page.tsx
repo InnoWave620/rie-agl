@@ -27,30 +27,34 @@ export default function AnalyticsPage() {
       <>
         {/* Page Header */}
         <div className="bg-white border-b border-[#E2E6EF] px-8 py-6">
-          <h1 className="text-2xl font-bold text-[#0A0F24]">Analytics &amp; Reporting</h1>
-          <p className="text-sm text-[#535E75] mt-1">Recruitment performance metrics across all divisions</p>
-        </div>
-        <main className="flex-1 p-8 overflow-auto bg-[#F4F6F9] space-y-8">
-          {/* KPI Skeleton */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-5">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl border border-[#E2E6EF] shadow-sm p-6 animate-pulse">
-                <div className="w-10 h-10 bg-[#E2E6EF] rounded-xl mb-4" />
-                <div className="h-7 bg-[#E2E6EF] rounded-lg w-3/4 mb-2" />
-                <div className="h-3 bg-[#E2E6EF] rounded-lg w-full mb-1" />
-                <div className="h-3 bg-[#E2E6EF] rounded-lg w-2/3" />
-              </div>
-            ))}
+          <div className="max-w-[1400px] mx-auto w-full">
+            <h1 className="text-2xl font-bold text-[#0A0F24]">Analytics &amp; Reporting</h1>
+            <p className="text-sm text-[#535E75] mt-1">Recruitment performance metrics across all divisions</p>
           </div>
-          {/* Chart Skeleton */}
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="bg-white rounded-2xl border border-[#E2E6EF] shadow-sm p-7 animate-pulse">
-                <div className="h-4 bg-[#E2E6EF] rounded-lg w-1/3 mb-2" />
-                <div className="h-3 bg-[#E2E6EF] rounded-lg w-1/2 mb-5" />
-                <div className="h-48 bg-[#E2E6EF] rounded-lg" />
-              </div>
-            ))}
+        </div>
+        <main className="flex-1 p-8 overflow-auto bg-[#F4F6F9]">
+          <div className="max-w-[1400px] mx-auto w-full space-y-8">
+            {/* KPI Skeleton */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-5">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="bg-white rounded-2xl border border-[#E2E6EF] shadow-sm p-6 animate-pulse">
+                  <div className="w-10 h-10 bg-[#E2E6EF] rounded-xl mb-4" />
+                  <div className="h-7 bg-[#E2E6EF] rounded-lg w-3/4 mb-2" />
+                  <div className="h-3 bg-[#E2E6EF] rounded-lg w-full mb-1" />
+                  <div className="h-3 bg-[#E2E6EF] rounded-lg w-2/3" />
+                </div>
+              ))}
+            </div>
+            {/* Chart Skeleton */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="bg-white rounded-2xl border border-[#E2E6EF] shadow-sm p-7 animate-pulse">
+                  <div className="h-4 bg-[#E2E6EF] rounded-lg w-1/3 mb-2" />
+                  <div className="h-3 bg-[#E2E6EF] rounded-lg w-1/2 mb-5" />
+                  <div className="h-48 bg-[#E2E6EF] rounded-lg" />
+                </div>
+              ))}
+            </div>
           </div>
         </main>
       </>
@@ -61,11 +65,13 @@ export default function AnalyticsPage() {
     return (
       <>
         <div className="bg-white border-b border-[#E2E6EF] px-8 py-6">
-          <h1 className="text-2xl font-bold text-[#0A0F24]">Analytics &amp; Reporting</h1>
-          <p className="text-sm text-[#535E75] mt-1">Recruitment performance metrics</p>
+          <div className="max-w-[1400px] mx-auto w-full">
+            <h1 className="text-2xl font-bold text-[#0A0F24]">Analytics &amp; Reporting</h1>
+            <p className="text-sm text-[#535E75] mt-1">Recruitment performance metrics</p>
+          </div>
         </div>
         <main className="flex-1 flex items-center justify-center bg-[#F4F6F9]">
-          <div className="text-center">
+          <div className="text-center max-w-[1400px] mx-auto w-full">
             <div className="w-16 h-16 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center mx-auto mb-4 text-2xl">⚠️</div>
             <p className="text-sm font-semibold text-red-600">{error ?? 'No data available'}</p>
           </div>
@@ -109,11 +115,14 @@ export default function AnalyticsPage() {
     <>
       {/* Page Header */}
       <div className="bg-white border-b border-[#E2E6EF] px-8 py-6">
-        <h1 className="text-2xl font-bold text-[#0A0F24]">Analytics &amp; Reporting</h1>
-        <p className="text-sm text-[#535E75] mt-1">Recruitment performance metrics across all divisions</p>
+        <div className="max-w-[1400px] mx-auto w-full">
+          <h1 className="text-2xl font-bold text-[#0A0F24]">Analytics &amp; Reporting</h1>
+          <p className="text-sm text-[#535E75] mt-1">Recruitment performance metrics across all divisions</p>
+        </div>
       </div>
 
-      <main className="flex-1 p-8 overflow-auto bg-[#F4F6F9] space-y-10">
+      <main className="flex-1 p-8 overflow-auto bg-[#F4F6F9]">
+        <div className="max-w-[1400px] mx-auto w-full space-y-10">
 
         {/* KPI Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-5">
@@ -264,6 +273,7 @@ export default function AnalyticsPage() {
             </div>
           </div>
         )}
+        </div>
       </main>
     </>
   );

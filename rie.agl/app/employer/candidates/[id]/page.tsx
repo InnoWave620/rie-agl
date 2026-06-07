@@ -134,14 +134,15 @@ export default function CandidateProfilePage({ params }: Props) {
       />
 
       <main className="flex-1 p-6 overflow-auto bg-[#F4F6F9]">
-        <Link
-          href={job ? `/employer/jobs/${job.id}` : '/employer/jobs'}
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-gray-500 bg-white border border-gray-200 hover:border-[#001CB0]/30 hover:text-[#001CB0] transition-all mb-6 shadow-sm"
-        >
-          <ArrowLeft size={14} /> Back to Applicants
-        </Link>
+        <div className="max-w-[1400px] mx-auto w-full">
+          <Link
+            href={job ? `/employer/jobs/${job.id}` : '/employer/jobs'}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-gray-500 bg-white border border-gray-200 hover:border-[#001CB0]/30 hover:text-[#001CB0] transition-all mb-6 shadow-sm"
+          >
+            <ArrowLeft size={14} /> Back to Applicants
+          </Link>
 
-        <div className="grid grid-cols-1 xl:grid-cols-[300px_1fr] gap-6">
+          <div className="grid grid-cols-1 xl:grid-cols-[300px_1fr] gap-6">
 
           {/* ── Left: Profile Card Column ── */}
           <div className="space-y-4">
@@ -245,9 +246,14 @@ export default function CandidateProfilePage({ params }: Props) {
                 <button className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all border border-red-200">
                   <ThumbsDown size={14} /> Reject Candidate
                 </button>
-                <button className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-all">
+                <a
+                  href={`/api/candidates/${candidate.id}/cv`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 transition-all text-center"
+                >
                   <Download size={14} /> Download CV
-                </button>
+                </a>
               </div>
             </div>
           </div>
@@ -428,6 +434,7 @@ export default function CandidateProfilePage({ params }: Props) {
               </div>
             )}
           </div>
+        </div>
         </div>
       </main>
 
