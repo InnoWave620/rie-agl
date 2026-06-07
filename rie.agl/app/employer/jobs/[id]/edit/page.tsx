@@ -169,7 +169,7 @@ export default function EditJobPage({ params }: Props) {
         </div>
         <main className="flex-1 flex items-center justify-center bg-[#F4F6F9]">
           <div className="text-center max-w-[1400px] mx-auto w-full">
-            <div className="w-20 h-20 rounded-2xl bg-[#F4F6F9] border border-[#E2E6EF] flex items-center justify-center mx-auto mb-4 text-3xl">❌</div>
+            <div className="w-20 h-20 rounded-2xl bg-[#F4F6F9] border border-[#E2E6EF] flex items-center justify-center mx-auto mb-4 text-red-500"><AlertCircle size={32} /></div>
             <h3 className="text-lg font-bold text-[#0A0F24] mb-2">Job not found</h3>
             <Link
               href="/employer/jobs"

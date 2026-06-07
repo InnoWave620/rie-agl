@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { Upload, X, FileText, CheckCircle } from 'lucide-react';
+import { Upload, X, FileText, CheckCircle, AlertCircle } from 'lucide-react';
 import { formatFileSize } from '../../lib/utils';
 
 interface FileUploadProps {
@@ -134,8 +134,8 @@ export default function FileUpload({
         />
       </label>
       {error && (
-        <p className="mt-2 text-sm font-medium" style={{ color: '#EF4444' }}>
-          ⚠ {error}
+        <p className="mt-2 text-sm font-medium flex items-center gap-1" style={{ color: '#EF4444' }}>
+          <AlertCircle size={14} /> {error}
         </p>
       )}
     </div>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Eye, EyeOff, Lock, Mail, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, Loader2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
 // ── Stat card data ────────────────────────────────────────────────────────────
@@ -199,7 +199,7 @@ export default function LoginForm() {
               {/* Error */}
               {error && (
                 <div className="flex items-start gap-2.5 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">
-                  <span className="mt-0.5">⚠</span>
+                  <AlertCircle size={16} className="mt-0.5 shrink-0" />
                   <span>{error}</span>
                 </div>
               )}

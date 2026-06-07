@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   Eye, EyeOff, Lock, Mail, User, Building2,
-  Loader2, CheckCircle, ShieldCheck,
+  Loader2, CheckCircle, ShieldCheck, BrainCircuit, BarChart3, Globe, AlertCircle,
 } from 'lucide-react';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -27,10 +27,10 @@ const DEPARTMENTS = [
 ];
 
 const FEATURES = [
-  { icon: '🤖', text: 'AI-powered CV screening across 6 dimensions' },
-  { icon: '📊', text: 'Real-time candidate pipeline management' },
-  { icon: '🛡️', text: 'POPIA-compliant data handling' },
-  { icon: '🌍', text: 'Multi-country talent sourcing' },
+  { icon: 'brain', text: 'AI-powered CV screening across 6 dimensions' },
+  { icon: 'chart', text: 'Real-time candidate pipeline management' },
+  { icon: 'shield', text: 'POPIA-compliant data handling' },
+  { icon: 'globe', text: 'Multi-country talent sourcing' },
 ];
 
 // ── Password strength helper ──────────────────────────────────────────────────
@@ -166,7 +166,12 @@ export default function SignupPage() {
           <ul className="space-y-4">
             {FEATURES.map(f => (
               <li key={f.text} className="flex items-center gap-3 text-white/75 text-sm">
-                <span className="text-base">{f.icon}</span>
+                <span className="text-white/60">
+                  {f.icon === 'brain' && <BrainCircuit size={18} />}
+                  {f.icon === 'chart' && <BarChart3 size={18} />}
+                  {f.icon === 'shield' && <ShieldCheck size={18} />}
+                  {f.icon === 'globe' && <Globe size={18} />}
+                </span>
                 {f.text}
               </li>
             ))}
@@ -374,7 +379,7 @@ export default function SignupPage() {
                     </div>
                     {pwMismatch && (
                       <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                        <span>⚠</span> Passwords do not match
+                        <AlertCircle size={12} /> Passwords do not match
                       </p>
                     )}
                   </div>
@@ -382,7 +387,7 @@ export default function SignupPage() {
                   {/* Error box */}
                   {error && (
                     <div className="flex items-start gap-2.5 bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl">
-                      <span className="mt-0.5">⚠</span>
+                      <AlertCircle size={16} className="mt-0.5 shrink-0" />
                       <span>{error}</span>
                     </div>
                   )}

@@ -7,6 +7,7 @@ import {
   RadarChart, Radar, PolarGrid, PolarAngleAxis,
   ResponsiveContainer, Tooltip,
 } from 'recharts';
+import { AlertTriangle } from 'lucide-react';
 
 interface ScoreBreakdownProps {
   scoring: ScoringResult;
@@ -126,8 +127,8 @@ export default function ScoreBreakdown({ scoring }: ScoreBreakdownProps) {
           className="p-4 rounded-xl border"
           style={{ background: '#FEE2E2', borderColor: '#FECACA' }}
         >
-          <div className="font-semibold text-sm mb-2" style={{ color: '#991B1B' }}>
-            ⚠ AI Red Flags
+          <div className="font-semibold text-sm mb-2 flex items-center gap-1.5" style={{ color: '#991B1B' }}>
+            <AlertTriangle size={16} /> AI Red Flags
           </div>
           <ul className="space-y-1">
             {scoring.redFlags.map((flag, i) => (

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Header from '../../components/layout/Header';
 import { ScoreBadge, StatusBadge } from '../../components/common/StatusBadge';
 import { formatRelativeTime } from '../../lib/utils';
-import { Search, Loader2, Users, ArrowRight, Eye, ChevronDown } from 'lucide-react';
+import { Search, Loader2, Users, ArrowRight, Eye, ChevronDown, AlertCircle } from 'lucide-react';
 import type { ApplicationStatus, DecisionCategory } from '../../types';
 
 interface CandidateApp {
@@ -28,7 +28,7 @@ interface CandidateApp {
 
 const TABS = [
   { value: 'all', label: 'All Candidates' },
-  { value: 'fast_track', label: 'Fast Track ⚡' },
+  { value: 'fast_track', label: 'Fast Track' },
   { value: 'hr_review', label: 'HR Review' },
   { value: 'interview_invited', label: 'Shortlisted' },
   { value: 'hired', label: 'Hired' },
@@ -202,7 +202,7 @@ export default function CandidatesPage() {
           {/* Error State */}
           {error && !loading && (
             <div className="bg-white rounded-2xl border border-[#E2E6EF] shadow-sm p-16 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center text-2xl mx-auto mb-4">⚠️</div>
+              <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center text-red-500 mx-auto mb-4"><AlertCircle size={28} /></div>
               <h3 className="text-lg font-bold text-[#0A0F24] mb-1">Failed to load candidates</h3>
               <p className="text-sm text-[#535E75] mb-4">{error}</p>
               <button

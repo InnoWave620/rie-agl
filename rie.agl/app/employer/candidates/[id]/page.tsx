@@ -9,7 +9,7 @@ import { formatRelativeTime } from '../../../lib/utils';
 import {
   ArrowLeft, Download, Mail, Phone, MapPin,
   ThumbsUp, ThumbsDown, RefreshCw, Send, Calendar,
-  CheckCircle, X, Loader2, Sparkles, FileText, StickyNote,
+  CheckCircle, X, Loader2, Sparkles, FileText, StickyNote, User, BrainCircuit,
 } from 'lucide-react';
 import type { ApplicationStatus, DecisionCategory, Division } from '../../../types';
 
@@ -87,7 +87,9 @@ export default function CandidateProfilePage({ params }: Props) {
         <Header title="Not Found" subtitle="" />
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <div className="text-6xl mb-5">👤</div>
+            <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-5 text-gray-400">
+              <User size={40} />
+            </div>
             <h3 className="font-bold text-xl text-[#0A0F24] mb-2">Candidate not found</h3>
             <Link href="/employer/jobs" className="mt-3 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-[#001CB0] hover:bg-[#0020CC] transition-all">
               Back to Jobs
@@ -393,7 +395,7 @@ export default function CandidateProfilePage({ params }: Props) {
                     </div>
 
                     <div className="flex items-center gap-4 p-5 rounded-xl bg-gradient-to-r from-[#0A0F24] to-[#001CB0] text-white">
-                      <div className="text-3xl">🤖</div>
+                      <BrainCircuit size={28} />
                       <div>
                         <div className="text-xs font-bold text-white/60 uppercase tracking-wider mb-0.5">AI Recommendation</div>
                         <div className="text-lg font-black text-[#E66423]">
@@ -404,7 +406,9 @@ export default function CandidateProfilePage({ params }: Props) {
                   </>
                 ) : (
                   <div className="text-center py-16">
-                    <div className="text-5xl mb-4">🤖</div>
+                    <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4 text-gray-400">
+                      <BrainCircuit size={32} />
+                    </div>
                     <p className="font-bold text-[#0A0F24] mb-1">No AI Analysis Available</p>
                     <p className="text-sm text-gray-400">This application has not been evaluated by the AI system yet.</p>
                   </div>

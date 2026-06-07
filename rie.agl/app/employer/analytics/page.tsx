@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Header from '../../components/layout/Header';
 import { TimeToHireChart, PipelineFunnelChart, ScoreDistributionChart, ApplicationVolumeChart } from '../../components/analytics/Charts';
-import { TrendingDown, Users, Target, ShieldCheck, Clock, FileSearch, Loader2, BarChart3 } from 'lucide-react';
+import { TrendingDown, Users, Target, ShieldCheck, Clock, FileSearch, Loader2, BarChart3, AlertCircle } from 'lucide-react';
 import type { AnalyticsSummary } from '../../types';
 
 export default function AnalyticsPage() {
@@ -72,7 +72,7 @@ export default function AnalyticsPage() {
         </div>
         <main className="flex-1 flex items-center justify-center bg-[#F4F6F9]">
           <div className="text-center max-w-[1400px] mx-auto w-full">
-            <div className="w-16 h-16 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center mx-auto mb-4 text-2xl">⚠️</div>
+            <div className="w-16 h-16 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center mx-auto mb-4 text-red-500"><AlertCircle size={28} /></div>
             <p className="text-sm font-semibold text-red-600">{error ?? 'No data available'}</p>
           </div>
         </main>

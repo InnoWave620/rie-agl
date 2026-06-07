@@ -111,13 +111,7 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
   const hour     = new Date().getHours();
   const greeting = getGreeting(hour);
 
-  // Greeting icon based on time
-  const greetIcon =
-    hour < 5  ? '🌙' :
-    hour < 12 ? '☀️' :
-    hour < 17 ? '⛅' :
-    hour < 21 ? '🌆' :
-               '🌙';
+
 
   return (
     <header
@@ -310,7 +304,7 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
             {/* Name + greeting */}
             <div className="hidden md:flex flex-col items-start min-w-0">
               <span className="text-[13px] font-semibold text-[#0A0F24] leading-tight truncate max-w-[120px]">
-                {greetIcon}&nbsp;{greeting}
+                {greeting}
               </span>
               <span className="text-[11.5px] text-[#535E75] leading-tight truncate max-w-[120px]">
                 {displayUser.firstName}

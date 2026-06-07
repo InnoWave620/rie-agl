@@ -390,7 +390,7 @@ export default function EmployerDashboard() {
   return (
     <>
       <Header
-        title={`${greeting()}, ${session?.firstName ?? '…'} 👋`}
+        title={`${greeting()}, ${session?.firstName ?? '…'}`}
         subtitle="Here's your recruitment overview for today"
         user={
           session

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, CheckCircle, Loader2, User, Mail, Phone, MapPin, ArrowRight, Upload } from 'lucide-react';
+import { ChevronLeft, CheckCircle, Loader2, User, Mail, Phone, MapPin, ArrowRight, Upload, AlertCircle } from 'lucide-react';
 import FileUpload from '../../../components/common/FileUpload';
 
 interface Props { params: Promise<{ slug: string }> }
@@ -96,7 +96,9 @@ export default function ApplicationFormPage({ params }: Props) {
     return (
       <div className="min-h-screen bg-[#F4F6F9] flex items-center justify-center p-4">
         <div className="card text-center p-12 max-w-sm w-full">
-          <div className="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-5 text-3xl">🔍</div>
+          <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-5 text-[#E03131]">
+            <AlertCircle size={30} />
+          </div>
           <h2 className="font-bold text-lg text-[#0A0F24] mb-2">Position Not Found</h2>
           <p className="text-sm text-gray-400 mb-7">This job may no longer be open or the link may be invalid.</p>
           <Link
@@ -117,7 +119,7 @@ export default function ApplicationFormPage({ params }: Props) {
           <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 bg-green-50">
             <CheckCircle size={40} className="text-green-500" />
           </div>
-          <h2 className="text-2xl font-black text-[#0A0F24] mb-2">Application Submitted! 🎉</h2>
+          <h2 className="text-2xl font-black text-[#0A0F24] mb-2">Application Submitted!</h2>
           <p className="text-sm text-gray-500 mb-1">
             Thank you <strong className="text-[#0A0F24]">{form.firstName}</strong>! Your application for
           </p>
@@ -407,7 +409,11 @@ export default function ApplicationFormPage({ params }: Props) {
                 onClick={handleSubmit}
                 disabled={submitting}
               >
-                {submitting ? <Loader2 size={15} className="animate-spin" /> : '🚀'}
+                {submitting ? (
+                  <Loader2 size={15} className="animate-spin" />
+                ) : (
+                  <CheckCircle size={15} />
+                )}
                 {submitting ? 'Submitting…' : 'Submit Application'}
               </button>
             )}

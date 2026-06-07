@@ -23,8 +23,8 @@ export function getScoreBadgeClass(category?: DecisionCategory | null): string {
 
 export function getScoreLabel(category?: DecisionCategory | null): string {
   switch (category) {
-    case "fast_track":  return "Fast Track ⚡";
-    case "auto_invite": return "Auto Invite ✓";
+    case "fast_track":  return "Fast Track";
+    case "auto_invite": return "Auto Invite";
     case "hr_review":   return "HR Review";
     case "feedback":    return "Feedback";
     case "auto_reject": return "Auto Reject";

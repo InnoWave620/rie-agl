@@ -1,5 +1,6 @@
 import type { DecisionCategory, ApplicationStatus, JobStatus, Division } from '../../types';
 import { getScoreBadgeClass, getScoreLabel, getStatusClass, getStatusLabel, getJobStatusClass, getDivisionClass } from '../../lib/utils';
+import { Anchor, Train, Package } from 'lucide-react';
 
 interface ScoreBadgeProps {
   category?: DecisionCategory | null;
@@ -53,15 +54,12 @@ interface DivisionBadgeProps {
 }
 
 export function DivisionBadge({ division }: DivisionBadgeProps) {
-  const icons: Record<Division, string> = {
-    Port: '⚓',
-    Rail: '🚂',
-    Logistics: '📦',
-  };
   return (
-    <span className={getDivisionClass(division)}>
-      <span className="mr-1">{icons[division]}</span>
-      {division}
+    <span className={`${getDivisionClass(division)} inline-flex items-center gap-1 w-fit`}>
+      {division === 'Port' && <Anchor size={13} />}
+      {division === 'Rail' && <Train size={13} />}
+      {division === 'Logistics' && <Package size={13} />}
+      <span>{division}</span>
     </span>
   );
 }

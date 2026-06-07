@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Header from '../../components/layout/Header';
 import JobCard from '../../components/jobs/JobCard';
 import type { Job, JobStatus, Division } from '../../types';
-import { Search, Plus, Grid, List, Loader2, Briefcase, ChevronDown } from 'lucide-react';
+import { Search, Plus, Grid, List, Loader2, Briefcase, ChevronDown, AlertCircle } from 'lucide-react';
 
 const STATUSES: { value: JobStatus | 'all'; label: string }[] = [
   { value: 'all',       label: 'All' },
@@ -16,9 +16,9 @@ const STATUSES: { value: JobStatus | 'all'; label: string }[] = [
 
 const DIVISIONS: { value: Division | 'all'; label: string }[] = [
   { value: 'all',       label: 'All Divisions' },
-  { value: 'Port',      label: '⚓ Port' },
-  { value: 'Rail',      label: '🚂 Rail' },
-  { value: 'Logistics', label: '📦 Logistics' },
+  { value: 'Port',      label: 'Port' },
+  { value: 'Rail',      label: 'Rail' },
+  { value: 'Logistics', label: 'Logistics' },
 ];
 
 export default function JobsPage() {
@@ -187,7 +187,7 @@ export default function JobsPage() {
         {/* Error State */}
         {error && !loading && (
           <div className="flex flex-col items-center justify-center py-24 gap-3">
-            <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center text-2xl">⚠️</div>
+            <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center text-red-500"><AlertCircle size={28} /></div>
             <p className="text-sm font-semibold text-red-600">{error}</p>
           </div>
         )}
