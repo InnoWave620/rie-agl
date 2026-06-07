@@ -26,7 +26,7 @@ export default function CareersPage() {
   const [expLevel, setExpLevel] = useState<ExperienceLevel | 'all'>('all');
 
   useEffect(() => {
-    fetch('/api/jobs')
+    fetch('/api/jobs?public=true')
       .then(r => r.json())
       .then(d => { if (d.success) setJobs(d.data ?? []); })
       .finally(() => setLoading(false));

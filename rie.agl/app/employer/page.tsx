@@ -392,7 +392,9 @@ export default function EmployerDashboard() {
           session
             ? {
                 firstName: session.firstName,
+                lastName: session.lastName,
                 avatarInitials: session.avatarInitials,
+                avatarUrl: session.avatarUrl,
               }
             : undefined
         }
