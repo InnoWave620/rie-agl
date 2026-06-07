@@ -30,7 +30,7 @@ export default function JobCard({ job, variant = 'public' }: JobCardProps) {
         {variant === 'employer' && <JobStatusBadge status={job.status} />}
         {variant === 'public' && (
           <span className="text-xs shrink-0" style={{ color: '#9CA3AF' }}>
-            {job.publishedAt ? formatRelativeTime(job.publishedAt) : 'Draft'}
+            {job.publishedAt || job.createdAt ? formatRelativeTime(job.publishedAt || job.createdAt) : 'Recent'}
           </span>
         )}
       </div>
