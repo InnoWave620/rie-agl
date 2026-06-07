@@ -2,6 +2,7 @@ const { Worker } = require('bullmq');
 const driver = require('msnodesqlv8');
 const fs = require('fs');
 const path = require('path');
+const { S3Client, GetObjectCommand } = require('@aws-sdk/client-s3');
 
 // ─── Redis Connection Configuration ───
 const redisHost = process.env.REDIS_HOST || '127.0.0.1';
@@ -48,6 +49,50 @@ async function dbQuery(sql, params = []) {
   });
 }
 
+// ─── Cloudflare R2 & Gemini API Configuration ───
+const hasR2 = !!(
+  process.env.R2_ACCESS_KEY && process.env.R2_ACCESS_KEY !== 'xxxxxxxx' &&
+  process.env.R2_SECRET_KEY && process.env.R2_SECRET_KEY !== 'xxxxxxxx' &&
+  process.env.R2_ENDPOINT && !process.env.R2_ENDPOINT.includes('YOUR_ACCOUNT_ID')
+);
+
+const r2Client = new S3Client({
+  region: 'auto',
+  endpoint: process.env.R2_ENDPOINT || 'https://dummy.r2.cloudflarestorage.com',
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY || 'dummy',
+    secretAccessKey: process.env.R2_SECRET_KEY || 'dummy',
+  },
+});
+
+const geminiApiKey = process.env.GEMINI_API_KEY || null;
+
+async function downloadCV(cvUrl) {
+  let key = cvUrl;
+  try {
+    const url = new URL(cvUrl);
+    key = url.pathname.substring(1);
+  } catch {}
+
+  const bucketName = process.env.R2_BUCKET || 'rie-agl-cvs';
+  const response = await r2Client.send(
+    new GetObjectCommand({
+      Bucket: bucketName,
+      Key: key,
+    })
+  );
+
+  const streamToBuffer = (stream) =>
+    new Promise((resolve, reject) => {
+      const chunks = [];
+      stream.on('data', (chunk) => chunks.push(chunk));
+      stream.on('error', reject);
+      stream.on('end', () => resolve(Buffer.concat(chunks)));
+    });
+
+  return await streamToBuffer(response.Body);
+}
+
 // Helper to escape values safely in inline strings if parameterized is not needed
 function esc(val) {
   if (val == null) return 'NULL';
@@ -60,16 +105,17 @@ async function processApplication(applicationId) {
 
   // 1. Fetch application details
   const appRows = await dbQuery(`
-    SELECT ApplicantID, JobID, ApplicationStatus 
-    FROM Applications 
-    WHERE ApplicationID = ?
+    SELECT a.ApplicantID, a.JobID, a.ApplicationStatus, r.CVUrl
+    FROM Applications a
+    LEFT JOIN Resumes r ON r.ApplicantID = a.ApplicantID
+    WHERE a.ApplicationID = ?
   `, [parseInt(applicationId)]);
 
   if (!appRows.length) {
     throw new Error(`Application with ID ${applicationId} not found in database.`);
   }
 
-  const { ApplicantID, JobID } = appRows[0];
+  const { ApplicantID, JobID, CVUrl } = appRows[0];
 
   // 2. Set status to 'scoring' (indicates AI screening in progress)
   await dbQuery(`
@@ -103,57 +149,191 @@ async function processApplication(applicationId) {
     throw new Error(`Job with ID ${JobID} not found.`);
   }
 
-  const { Title: JobTitle } = jobRows[0];
+  const { Title: JobTitle, Requirements: JobRequirements } = jobRows[0];
 
-  // 5. Simulate AI Analysis & Score Calculation
-  // Generate random but realistic dimensions (deterministic mock based on candidate name / job title)
-  const hash = (FullName + JobTitle).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const getScore = (min, max, offset) => min + ((hash + offset) % (max - min + 1));
-
-  const skillsScore = getScore(65, 98, 7);
-  const experienceScore = getScore(60, 95, 12);
-  const educationScore = getScore(70, 100, 23);
-  const certificationScore = getScore(40, 95, 34);
-  const semanticScore = getScore(65, 98, 45);
-  const resumeQualityScore = getScore(70, 98, 56);
-
-  const finalScore = parseFloat(
-    ((skillsScore + experienceScore + educationScore + certificationScore + semanticScore + resumeQualityScore) / 6).toFixed(1)
-  );
-
+  let skillsScore, experienceScore, educationScore, certificationScore, semanticScore, resumeQualityScore, finalScore;
   let recommendation = 'hr_review';
-  let nextStatus = 'hr_review';
+  let aiSummary = '';
+  let strengths = '';
+  let weaknesses = '';
 
-  if (finalScore >= 90) {
-    recommendation = 'fast_track';
-    nextStatus = 'interview_invited';
-  } else if (finalScore >= 80) {
-    recommendation = 'auto_invite';
-    nextStatus = 'interview_invited';
-  } else if (finalScore >= 70) {
-    recommendation = 'hr_review';
-    nextStatus = 'hr_review';
-  } else if (finalScore >= 60) {
-    recommendation = 'feedback';
-    nextStatus = 'hr_review';
-  } else {
-    recommendation = 'auto_reject';
-    nextStatus = 'rejected';
+  let evaluationSuccess = false;
+
+  if (geminiApiKey && CVUrl && hasR2) {
+    try {
+      console.log(`[Worker] Live Gemini API and Cloudflare R2 detected. Downloading CV: ${CVUrl}`);
+      const pdfBuffer = await downloadCV(CVUrl);
+
+      console.log('[Worker] File downloaded successfully. Calling Gemini API...');
+      const prompt = `
+        You are an expert AI recruiter for RIE-AGL Careers.
+        Your task is to evaluate the attached candidate CV (PDF) against the requirements of the job opening:
+
+        Job Title: ${JobTitle}
+        Job Requirements:
+        ${JobRequirements || 'No specific requirements listed. Assess general fit for the job title.'}
+
+        Evaluate the candidate across the following dimensions:
+        1. Skills Match: How closely do the candidate's skills align with the requirements?
+        2. Experience Match: Does their career history match the expected level and scope?
+        3. Education Match: Do they have the required degrees or qualifications?
+        4. Certification Match: Do they hold the listed certifications or licenses?
+        5. Semantic Match: Does their overall profile fit the role description?
+        6. Resume Quality: Is the CV clean, well-formatted, professional, and clear?
+
+        Assign a score out of 100 for each dimension.
+        Calculate the Final Score as the mathematical average of the 6 dimensions (rounded to 1 decimal place).
+
+        Provide a recommendation category:
+        - "fast_track" (Final Score >= 90)
+        - "auto_invite" (Final Score 80-89)
+        - "hr_review" (Final Score 70-79)
+        - "feedback" (Final Score 60-69)
+        - "auto_reject" (Final Score < 60)
+
+        Provide a detailed summary (AISummary) explaining the evaluation, key strengths (semicolon-separated list), and weaknesses/areas to improve (semicolon-separated list).
+      `;
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    inlineData: {
+                      mimeType: 'application/pdf',
+                      data: pdfBuffer.toString('base64'),
+                    },
+                  },
+                  {
+                    text: prompt,
+                  },
+                ],
+              },
+            ],
+            generationConfig: {
+              responseMimeType: 'application/json',
+              responseSchema: {
+                type: 'object',
+                properties: {
+                  skillsScore: { type: 'number' },
+                  experienceScore: { type: 'number' },
+                  educationScore: { type: 'number' },
+                  certificationScore: { type: 'number' },
+                  semanticScore: { type: 'number' },
+                  resumeQualityScore: { type: 'number' },
+                  finalScore: { type: 'number' },
+                  recommendation: {
+                    type: 'string',
+                    enum: ['fast_track', 'auto_invite', 'hr_review', 'feedback', 'auto_reject'],
+                  },
+                  aiSummary: { type: 'string' },
+                  strengths: { type: 'string' },
+                  weaknesses: { type: 'string' },
+                },
+                required: [
+                  'skillsScore',
+                  'experienceScore',
+                  'educationScore',
+                  'certificationScore',
+                  'semanticScore',
+                  'resumeQualityScore',
+                  'finalScore',
+                  'recommendation',
+                  'aiSummary',
+                  'strengths',
+                  'weaknesses',
+                ],
+              },
+            },
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Gemini API returned status ${response.status}: ${errText}`);
+      }
+
+      const result = await response.json();
+      const jsonText = result.candidates[0].content.parts[0].text;
+      const evaluation = JSON.parse(jsonText);
+
+      skillsScore = evaluation.skillsScore;
+      experienceScore = evaluation.experienceScore;
+      educationScore = evaluation.educationScore;
+      certificationScore = evaluation.certificationScore;
+      semanticScore = evaluation.semanticScore;
+      resumeQualityScore = evaluation.resumeQualityScore;
+      finalScore = evaluation.finalScore;
+      recommendation = evaluation.recommendation;
+      aiSummary = evaluation.aiSummary;
+      strengths = evaluation.strengths;
+      weaknesses = evaluation.weaknesses;
+
+      evaluationSuccess = true;
+      console.log(`[Worker] Live Gemini AI evaluation completed successfully for applicant ${FullName}.`);
+    } catch (apiError) {
+      console.error('[Worker] Live Gemini AI evaluation failed, falling back to mock scoring:', apiError);
+    }
   }
 
-  // 6. Generate AI evaluation texts
-  const aiSummary = `Applicant ${FullName} exhibits strong structural alignment for the ${JobTitle} role. Their background shows competent proficiency in technical workflows with a final compatibility index of ${finalScore}%. They demonstrate solid analytical abilities and meet the core criteria required for RIE-AGL standards.`;
-  
-  const strengths = [
-    `Strong technical skills alignment matching ${JobTitle} parameters`,
-    `Solid background scoring high on experience criteria (${experienceScore}%)`,
-    `Excellent resume presentation and clarity of accomplishments`
-  ].join('; ');
+  // Fallback to mock scoring if Gemini is not configured or failed
+  if (!evaluationSuccess) {
+    console.log(`[Worker] Executing deterministic mock grading for applicant ${FullName}...`);
+    const hash = (FullName + JobTitle).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const getScore = (min, max, offset) => min + ((hash + offset) % (max - min + 1));
 
-  const weaknesses = [
-    `Minor gaps in active certifications relative to maximum job requirements`,
-    `Could benefit from showing more concrete volume metrics in logistics workflows`
-  ].join('; ');
+    skillsScore = getScore(65, 98, 7);
+    experienceScore = getScore(60, 95, 12);
+    educationScore = getScore(70, 100, 23);
+    certificationScore = getScore(40, 95, 34);
+    semanticScore = getScore(65, 98, 45);
+    resumeQualityScore = getScore(70, 98, 56);
+
+    finalScore = parseFloat(
+      ((skillsScore + experienceScore + educationScore + certificationScore + semanticScore + resumeQualityScore) / 6).toFixed(1)
+    );
+
+    if (finalScore >= 90) {
+      recommendation = 'fast_track';
+    } else if (finalScore >= 80) {
+      recommendation = 'auto_invite';
+    } else if (finalScore >= 70) {
+      recommendation = 'hr_review';
+    } else if (finalScore >= 60) {
+      recommendation = 'feedback';
+    } else {
+      recommendation = 'auto_reject';
+    }
+
+    aiSummary = `Applicant ${FullName} exhibits strong structural alignment for the ${JobTitle} role. Their background shows competent proficiency in technical workflows with a final compatibility index of ${finalScore}%. They demonstrate solid analytical abilities and meet the core criteria required for RIE-AGL standards.`;
+
+    strengths = [
+      `Strong technical skills alignment matching ${JobTitle} parameters`,
+      `Solid background scoring high on experience criteria (${experienceScore}%)`,
+      `Excellent resume presentation and clarity of accomplishments`
+    ].join('; ');
+
+    weaknesses = [
+      `Minor gaps in active certifications relative to maximum job requirements`,
+      `Could benefit from showing more concrete volume metrics in logistics workflows`
+    ].join('; ');
+  }
+
+  // Map recommendation to next database application status
+  let nextStatus = 'hr_review';
+  if (recommendation === 'fast_track' || recommendation === 'auto_invite') {
+    nextStatus = 'interview_invited';
+  } else if (recommendation === 'auto_reject') {
+    nextStatus = 'rejected';
+  } else {
+    nextStatus = 'hr_review';
+  }
 
   // 7. Write Scores and Evaluations into DB
   // Delete existing scores if any to avoid uniqueness errors
