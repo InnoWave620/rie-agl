@@ -16,6 +16,7 @@ export default async function EmployerLayout({ children }: { children: React.Rea
         lastName:       session.lastName ?? '',
         role:           session.role,
         avatarInitials: session.avatarInitials,
+        avatarUrl:      session.avatarUrl,
       }
     : {
         firstName:      'User',

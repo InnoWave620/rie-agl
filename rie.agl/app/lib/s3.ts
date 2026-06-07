@@ -91,3 +91,37 @@ export async function getPresignedCVUrl(
   }
 }
 
+/**
+ * Uploads a profile picture to Cloudflare R2 under the 'avatars/' prefix.
+ */
+export async function uploadAvatar(
+  fileBuffer: Buffer,
+  fileName: string,
+  mimeType: string
+): Promise<string> {
+  const timestamp = Date.now();
+  const sanitizedName = fileName.replace(/[^a-zA-Z0-9.-]/g, '_');
+  const key = `avatars/${timestamp}_${sanitizedName}`;
+
+  if (!hasCredentials) {
+    console.warn('[Cloudflare R2] Credentials missing. Falling back to local mock upload.');
+    return `https://${bucketName}.r2.cloudflarestorage.com/${key}`;
+  }
+
+  try {
+    await r2.send(
+      new PutObjectCommand({
+        Bucket: bucketName,
+        Key: key,
+        Body: fileBuffer,
+        ContentType: mimeType,
+      })
+    );
+    return `https://${bucketName}.r2.cloudflarestorage.com/${key}`;
+  } catch (error) {
+    console.error('[Cloudflare R2] Failed to upload avatar to R2:', error);
+    throw error;
+  }
+}
+
+

@@ -14,6 +14,7 @@ interface HeaderProps {
     firstName: string;
     lastName?: string;
     avatarInitials: string;
+    avatarUrl?: string;
   };
 }
 
@@ -289,17 +290,25 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
             aria-label="User menu"
           >
             {/* Avatar */}
-            <div
-              className={cn(
-                'w-[36px] h-[36px] rounded-full shrink-0',
-                'flex items-center justify-center',
-                'bg-gradient-to-br from-[#001CB0] to-[#0025E0]',
-                'text-white text-[13px] font-bold',
-                'ring-2 ring-[#001CB0]/20',
-              )}
-            >
-              {displayUser.avatarInitials}
-            </div>
+            {displayUser.avatarUrl ? (
+              <img
+                src={displayUser.avatarUrl}
+                alt={`${displayUser.firstName} ${displayUser.lastName}`}
+                className="w-[36px] h-[36px] rounded-full object-cover shrink-0 ring-2 ring-[#001CB0]/20"
+              />
+            ) : (
+              <div
+                className={cn(
+                  'w-[36px] h-[36px] rounded-full shrink-0',
+                  'flex items-center justify-center',
+                  'bg-gradient-to-br from-[#001CB0] to-[#0025E0]',
+                  'text-white text-[13px] font-bold',
+                  'ring-2 ring-[#001CB0]/20',
+                )}
+              >
+                {displayUser.avatarInitials}
+              </div>
+            )}
 
             {/* Name + greeting */}
             <div className="hidden md:flex flex-col items-start min-w-0">

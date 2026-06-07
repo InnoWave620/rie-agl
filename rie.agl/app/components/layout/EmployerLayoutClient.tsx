@@ -9,6 +9,7 @@ interface Props {
     lastName: string;
     role: string;
     avatarInitials: string;
+    avatarUrl?: string;
   };
   children: React.ReactNode;
 }

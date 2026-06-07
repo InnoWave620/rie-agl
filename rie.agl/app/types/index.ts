@@ -187,6 +187,7 @@ export interface AuthSession {
   lastName: string;
   role: UserRole;
   avatarInitials: string;
+  avatarUrl?: string;
 }
 
 export interface LoginCredentials {

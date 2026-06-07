@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import Header from '../../components/layout/Header';
-import { Shield, Users, Bell, Database, Key, Plus, Edit2, Loader2, CheckCircle, Save } from 'lucide-react';
+import { Shield, Users, Bell, Database, Key, Plus, Edit2, Loader2, CheckCircle, Save, User, Camera, Upload, AlertCircle, ChevronDown } from 'lucide-react';
 
 const SETTING_TABS = [
+  { key: 'profile',       label: 'My Profile',           icon: User },
   { key: 'team',          label: 'Team',                 icon: Users },
   { key: 'roles',         label: 'Roles & Permissions',  icon: Shield },
   { key: 'notifications', label: 'Notifications',         icon: Bell },
@@ -22,10 +23,11 @@ interface DBUser {
   role: string;
   division?: string;
   avatarInitials: string;
+  avatarUrl?: string;
 }
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<SettingTab>('team');
+  const [activeTab, setActiveTab] = useState<SettingTab>('profile');
   const [users, setUsers]         = useState<DBUser[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [notifs, setNotifs] = useState({
@@ -33,7 +35,35 @@ export default function SettingsPage() {
   });
   const [retention, setRetention] = useState('365');
 
+  // Profile Form States
+  const [session, setSession] = useState<any>(null);
+  const [profileFirstName, setProfileFirstName] = useState('');
+  const [profileLastName, setProfileLastName] = useState('');
+  const [profileEmail, setProfileEmail] = useState('');
+  const [profileRole, setProfileRole] = useState('');
+  const [profileAvatarUrl, setProfileAvatarUrl] = useState('');
+  const [profilePassword, setProfilePassword] = useState('');
+  const [profileConfirmPassword, setProfileConfirmPassword] = useState('');
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
   useEffect(() => {
+    fetch('/api/auth')
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && d.data?.user) {
+          const u = d.data.user;
+          setSession(u);
+          setProfileFirstName(u.firstName ?? '');
+          setProfileLastName(u.lastName ?? '');
+          setProfileEmail(u.email ?? '');
+          setProfileRole(u.role ?? 'recruiter');
+          setProfileAvatarUrl(u.avatarUrl ?? '');
+        }
+      });
+
     fetch('/api/users')
       .then(r => r.json())
       .then(d => { if (d.success) setUsers(d.data ?? []); })
@@ -49,9 +79,82 @@ export default function SettingsPage() {
     return 'bg-gray-100 text-gray-500';
   };
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setSaveError(null);
+    setSaveSuccess(null);
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', 'avatar');
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        setProfileAvatarUrl(data.url);
+        setSaveSuccess('Profile picture uploaded successfully!');
+      } else {
+        setSaveError(data.error ?? 'Failed to upload profile picture.');
+      }
+    } catch {
+      setSaveError('Network error uploading profile picture.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    setSaveError(null);
+    setSaveSuccess(null);
+
+    if (profilePassword && profilePassword !== profileConfirmPassword) {
+      setSaveError('Passwords do not match');
+      setSaving(false);
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/users', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: profileFirstName,
+          lastName: profileLastName,
+          email: profileEmail,
+          role: profileRole,
+          avatarUrl: profileAvatarUrl,
+          password: profilePassword,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSaveSuccess('Profile updated successfully!');
+        setProfilePassword('');
+        setProfileConfirmPassword('');
+        // Reload to update sidebar and header immediately
+        window.location.reload();
+      } else {
+        setSaveError(data.error ?? 'Failed to update profile.');
+      }
+    } catch {
+      setSaveError('Network error saving profile.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <>
-      <Header title="Settings" subtitle="Platform configuration and team management" />
+      <Header title="Settings" subtitle="Platform configuration and user profile settings" />
 
       <main className="flex-1 p-6 sm:p-8 overflow-auto bg-[#F4F6F9]">
         <div className="flex flex-col md:flex-row gap-8 max-w-6xl mx-auto">
@@ -81,6 +184,227 @@ export default function SettingsPage() {
 
           {/* ── Content ── */}
           <div className="flex-1 space-y-6 min-w-0">
+
+            {/* ── My Profile Settings ── */}
+            {activeTab === 'profile' && (
+              <form onSubmit={handleSaveProfile} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-7 space-y-8">
+                <div>
+                  <h2 className="text-lg font-bold text-[#0A0F24]">My Profile</h2>
+                  <p className="text-sm text-gray-400 mt-1 font-medium">Manage your personal details and platform settings</p>
+                </div>
+
+                {saveSuccess && (
+                  <div className="flex items-center gap-2.5 p-4 rounded-xl text-sm font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                    <CheckCircle size={16} className="text-emerald-600" />
+                    <span>{saveSuccess}</span>
+                  </div>
+                )}
+
+                {saveError && (
+                  <div className="flex items-center gap-2.5 p-4 rounded-xl text-sm font-semibold bg-red-50 text-red-800 border border-red-200">
+                    <AlertCircle size={16} className="text-red-600" />
+                    <span>{saveError}</span>
+                  </div>
+                )}
+
+                {/* Avatar Section */}
+                <div className="flex flex-col sm:flex-row items-center gap-6 pb-6 border-b border-gray-100">
+                  <div className="relative group shrink-0">
+                    {profileAvatarUrl ? (
+                      <img
+                        src={profileAvatarUrl}
+                        alt="Profile avatar"
+                        className="w-24 h-24 rounded-full object-cover ring-4 ring-[#001CB0]/10"
+                      />
+                    ) : (
+                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#001CB0] to-[#0025E0] flex items-center justify-center text-white text-3xl font-black ring-4 ring-[#001CB0]/10">
+                        {session?.avatarInitials ?? 'U'}
+                      </div>
+                    )}
+                    <label className="absolute inset-0 flex items-center justify-center bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity duration-200">
+                      <Camera size={20} />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAvatarUpload}
+                        className="hidden"
+                        disabled={uploading}
+                      />
+                    </label>
+                  </div>
+                  <div className="text-center sm:text-left space-y-2">
+                    <div className="text-sm font-bold text-[#0A0F24]">Profile Picture</div>
+                    <div className="text-xs text-gray-400 font-medium">Upload a square image (PNG or JPG) up to 2MB.</div>
+                    <div className="flex items-center gap-3 mt-1 justify-center sm:justify-start">
+                      <label className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-[#001CB0] bg-[#001CB0]/10 hover:bg-[#001CB0]/20 cursor-pointer transition-all">
+                        {uploading ? (
+                          <>
+                            <Loader2 size={12} className="animate-spin animate-infinite" />
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Upload size={12} />
+                            Upload Photo
+                          </>
+                        )}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleAvatarUpload}
+                          className="hidden"
+                          disabled={uploading}
+                        />
+                      </label>
+                      {profileAvatarUrl && (
+                        <button
+                          type="button"
+                          onClick={() => setProfileAvatarUrl('')}
+                          className="px-4 py-2 rounded-xl text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 transition-all"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Profile Fields */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2" htmlFor="firstName">
+                      First Name
+                    </label>
+                    <input
+                      id="firstName"
+                      type="text"
+                      className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                      value={profileFirstName}
+                      onChange={e => setProfileFirstName(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2" htmlFor="lastName">
+                      Last Name
+                    </label>
+                    <input
+                      id="lastName"
+                      type="text"
+                      className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                      value={profileLastName}
+                      onChange={e => setProfileLastName(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2" htmlFor="email">
+                      Email Address
+                    </label>
+                    <input
+                      id="email"
+                      type="email"
+                      className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                      value={profileEmail}
+                      onChange={e => setProfileEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2" htmlFor="role">
+                      Role at Company
+                    </label>
+                    <div className="relative">
+                      <select
+                        id="role"
+                        className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all appearance-none cursor-pointer"
+                        value={profileRole}
+                        onChange={e => setProfileRole(e.target.value)}
+                      >
+                        <option value="recruiter">Recruiter</option>
+                        <option value="hr_manager">HR Manager</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                      <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Avatar URL input */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2" htmlFor="avatarUrl">
+                    Profile Picture URL (Optional)
+                  </label>
+                  <input
+                    id="avatarUrl"
+                    type="url"
+                    className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                    placeholder="https://example.com/avatar.jpg"
+                    value={profileAvatarUrl}
+                    onChange={e => setProfileAvatarUrl(e.target.value)}
+                  />
+                  <p className="text-[11px] text-gray-400 mt-1 font-medium">Or paste an external web URL linking directly to your profile image.</p>
+                </div>
+
+                {/* Password Section */}
+                <div className="pt-6 border-t border-gray-100 space-y-6">
+                  <div>
+                    <h3 className="font-bold text-sm text-[#0A0F24]">Security Settings</h3>
+                    <p className="text-xs text-gray-400 mt-0.5 font-medium">Update your account login password</p>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2" htmlFor="newPassword">
+                        New Password
+                      </label>
+                      <input
+                        id="newPassword"
+                        type="password"
+                        className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                        placeholder="••••••••"
+                        value={profilePassword}
+                        onChange={e => setProfilePassword(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2" htmlFor="confirmPassword">
+                        Confirm New Password
+                      </label>
+                      <input
+                        id="confirmPassword"
+                        type="password"
+                        className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                        placeholder="••••••••"
+                        value={profileConfirmPassword}
+                        onChange={e => setProfileConfirmPassword(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 flex justify-end">
+                  <button
+                    type="submit"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white bg-[#001CB0] hover:bg-[#0020CC] shadow-md shadow-[#001CB0]/20 hover:shadow-[#001CB0]/30 transition-all disabled:opacity-50"
+                    disabled={saving}
+                  >
+                    {saving ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin" />
+                        Saving Profile...
+                      </>
+                    ) : (
+                      <>
+                        <Save size={16} />
+                        Save Profile Settings
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            )}
 
             {/* ── Team Management ── */}
             {activeTab === 'team' && (
@@ -115,12 +439,20 @@ export default function SettingsPage() {
                           <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
                             <td className="px-7 py-5">
                               <div className="flex items-center gap-3">
-                                <div
-                                  className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-xs font-bold shrink-0"
-                                  style={{ background: user.id === currentUserId ? '#E66423' : '#001CB0' }}
-                                >
-                                  {user.avatarInitials}
-                                </div>
+                                {user.avatarUrl ? (
+                                  <img
+                                    src={user.avatarUrl}
+                                    alt={`${user.firstName} ${user.lastName}`}
+                                    className="w-10 h-10 rounded-xl object-cover shrink-0"
+                                  />
+                                ) : (
+                                  <div
+                                    className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-xs font-bold shrink-0"
+                                    style={{ background: user.id === currentUserId ? '#E66423' : '#001CB0' }}
+                                  >
+                                    {user.avatarInitials}
+                                  </div>
+                                )}
                                 <div>
                                   <div className="font-semibold text-sm text-[#0A0F24]">
                                     {user.firstName} {user.lastName}

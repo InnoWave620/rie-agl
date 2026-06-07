@@ -50,6 +50,7 @@ interface SidebarProps {
     lastName: string;
     role: string;
     avatarInitials: string;
+    avatarUrl?: string;
   };
   /** Called when mobile close button is pressed */
   onClose?: () => void;
@@ -268,16 +269,24 @@ export default function Sidebar({ user, onClose, mobileOpen }: SidebarProps) {
         {!collapsed ? (
           <div className="flex items-center gap-2.5">
             {/* Avatar */}
-            <div
-              className={cn(
-                'w-9 h-9 rounded-full flex items-center justify-center',
-                'text-white text-[13px] font-bold shrink-0',
-                'bg-gradient-to-br from-[#001CB0] to-[#0025E0]',
-                'ring-2 ring-white/10',
-              )}
-            >
-              {displayUser.avatarInitials}
-            </div>
+            {displayUser.avatarUrl ? (
+              <img
+                src={displayUser.avatarUrl}
+                alt={`${displayUser.firstName} ${displayUser.lastName}`}
+                className="w-9 h-9 rounded-full object-cover shrink-0 ring-2 ring-white/10"
+              />
+            ) : (
+              <div
+                className={cn(
+                  'w-9 h-9 rounded-full flex items-center justify-center',
+                  'text-white text-[13px] font-bold shrink-0',
+                  'bg-gradient-to-br from-[#001CB0] to-[#0025E0]',
+                  'ring-2 ring-white/10',
+                )}
+              >
+                {displayUser.avatarInitials}
+              </div>
+            )}
 
             {/* Name + role */}
             <div className="flex-1 min-w-0">
