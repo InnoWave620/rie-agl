@@ -339,7 +339,7 @@ export default function SettingsPage() {
                   </label>
                   <input
                     id="avatarUrl"
-                    type="url"
+                    type="text"
                     className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
                     placeholder="https://example.com/avatar.jpg"
                     value={profileAvatarUrl}
