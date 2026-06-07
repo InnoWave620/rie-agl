@@ -29,7 +29,24 @@ function getGreeting(hour: number): string {
 
 /* ─── Component ─────────────────────────────────────── */
 export default function Header({ title, subtitle, user }: HeaderProps) {
-  const displayUser = user ?? { firstName: 'User', lastName: '', avatarInitials: 'U' };
+  const [currentUser, setCurrentUser] = useState<any>(user);
+
+  useEffect(() => {
+    if (user) {
+      setCurrentUser(user);
+      return;
+    }
+    fetch('/api/auth')
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success && d.data?.user) {
+          setCurrentUser(d.data.user);
+        }
+      })
+      .catch((err) => console.error('Error fetching user in Header:', err));
+  }, [user]);
+
+  const displayUser = currentUser ?? { firstName: 'User', lastName: '', avatarInitials: 'U' };
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<{
@@ -282,6 +299,7 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
           {/* User avatar + name + chevron */}
           <button
             id="header-user-menu-btn"
+            title={`${greeting}, ${displayUser.firstName} ${displayUser.lastName || ''}`.trim()}
             className={cn(
               'flex items-center gap-2.5 pl-1 pr-2 py-1.5 rounded-xl',
               'hover:bg-[#F4F6F9]',
@@ -312,12 +330,11 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
 
             {/* Name + greeting */}
             <div className="hidden md:flex flex-col items-start min-w-0">
-              <span className="text-[13px] font-semibold text-[#0A0F24] leading-tight truncate max-w-[120px]">
-                {greeting}
+              <span className="text-[13px] font-semibold text-[#0A0F24] leading-tight truncate max-w-[160px]">
+                {greeting}, {displayUser.firstName}
               </span>
-              <span className="text-[11.5px] text-[#535E75] leading-tight truncate max-w-[120px]">
-                {displayUser.firstName}
-                {displayUser.lastName ? ` ${displayUser.lastName}` : ''}
+              <span className="text-[11.5px] text-[#535E75] leading-tight truncate max-w-[160px]">
+                {displayUser.firstName} {displayUser.lastName || ''}
               </span>
             </div>
 
