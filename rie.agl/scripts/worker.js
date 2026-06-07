@@ -70,6 +70,64 @@ async function dbQuery(sql, params = []) {
   });
 }
 
+// ─── SMTP Email Configuration ───
+const nodemailer = require('nodemailer');
+
+const smtpHost = process.env.SMTP_HOST;
+const smtpPort = parseInt(process.env.SMTP_PORT || '587');
+const smtpUser = process.env.SMTP_USER;
+const smtpPass = process.env.SMTP_PASS;
+const smtpFrom = process.env.SMTP_FROM || 'careers@rie-agl.com';
+
+const hasSmtp = !!(smtpHost && smtpUser && smtpPass);
+
+const smtpTransporter = hasSmtp
+  ? nodemailer.createTransport({
+      host: smtpHost,
+      port: smtpPort,
+      secure: smtpPort === 465,
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
+      },
+    })
+  : null;
+
+async function sendWorkerEmail({ to, subject, text }) {
+  if (!smtpTransporter) {
+    console.warn('[SMTP] SMTP credentials missing in .env.local. Logging mock email.');
+    const mockLogDir = path.join(__dirname, '..', 'scratch');
+    if (!fs.existsSync(mockLogDir)) {
+      fs.mkdirSync(mockLogDir, { recursive: true });
+    }
+    const logPath = path.join(mockLogDir, 'mock_emails.log');
+    const logMessage = 
+      `======================================================\n` +
+      `MOCK EMAIL SENDER (REAL SMTP NOT CONFIGURED)\n` +
+      `Date: ${new Date().toISOString()}\n` +
+      `To: ${to}\n` +
+      `Subject: ${subject}\n\n` +
+      `${text}\n` +
+      `======================================================\n\n`;
+    fs.appendFileSync(logPath, logMessage);
+    return;
+  }
+
+  try {
+    const info = await smtpTransporter.sendMail({
+      from: smtpFrom,
+      to,
+      subject,
+      text,
+      html: text.replace(/\n/g, '<br>'),
+    });
+    console.log(`[SMTP] Email sent successfully to ${to}. Message ID: ${info.messageId}`);
+  } catch (error) {
+    console.error(`[SMTP] Failed to send email to ${to}:`, error);
+    throw error;
+  }
+}
+
 // ─── Cloudflare R2 & Gemini API Configuration ───
 const hasR2 = !!(
   process.env.R2_ACCESS_KEY && process.env.R2_ACCESS_KEY !== 'xxxxxxxx' &&
@@ -389,37 +447,30 @@ async function processApplication(applicationId) {
 
   console.log(`[Worker] Evaluation completed. Score: ${finalScore}%, Recommendation: ${recommendation}, Next Status: ${nextStatus}`);
 
-  // 9. Simulate Sending Email Notification (write to mock logs & log to console)
-  const mockLogDir = path.join(__dirname, '..', 'scratch');
-  if (!fs.existsSync(mockLogDir)) {
-    fs.mkdirSync(mockLogDir, { recursive: true });
-  }
-
-  const logPath = path.join(mockLogDir, 'mock_emails.log');
-  
-  let logMessage = '';
+  // 9. Send Email Notification (uses SMTP if configured, falls back to logging)
   if (nextStatus === 'rejected') {
-    logMessage = 
-      `======================================================\n` +
-      `MOCK EMAIL DISPATCH: AUTO-REJECTION\n` +
-      `Date: ${new Date().toISOString()}\n` +
-      `To: ${Email} (${FullName})\n` +
-      `Subject: Update on your application for ${JobTitle} at RIE-AGL\n\n` +
+    const rejectionText =
       `Dear ${FullName},\n\n` +
       `Thank you for your interest in the ${JobTitle} position at RIE-AGL Careers and for taking the time to submit your CV.\n\n` +
       `We have reviewed your qualifications, skills match, and experience (ATS compatibility score: ${finalScore}%) for this role. Unfortunately, we have decided not to proceed with your application at this time.\n\n` +
       `We appreciate your interest in RIE-AGL and wish you all the best in your job search.\n\n` +
       `Best regards,\n` +
       `HR Recruitment Team\n` +
-      `RIE-AGL Careers\n` +
-      `======================================================\n\n`;
-    console.log(`[Worker] Auto-rejection email dispatched to ${Email}.`);
+      `RIE-AGL Careers`;
+
+    await sendWorkerEmail({
+      to: Email,
+      subject: `Update on your application for ${JobTitle} at RIE-AGL`,
+      text: rejectionText,
+    });
   } else {
-    logMessage = `[${new Date().toISOString()}] To: ${Email} (${FullName}) | Job: ${JobTitle} | Status Update: ${nextStatus} | ATS Score: ${finalScore} | Recommendation: ${recommendation}\n`;
+    const statusText = `Dear ${FullName},\n\nThis is an update regarding your application for ${JobTitle}. Your application status has been updated to: ${nextStatus}.\n\nBest regards,\nHR Recruitment Team\nRIE-AGL Careers`;
+    await sendWorkerEmail({
+      to: Email,
+      subject: `Application Update: ${JobTitle} at RIE-AGL`,
+      text: statusText,
+    });
   }
-  
-  fs.appendFileSync(logPath, logMessage);
-  console.log(`[Worker] Simulated email notification logged in scratch/mock_emails.log.`);
 }
 
 // ─── Start BullMQ Worker ───

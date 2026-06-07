@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { execute } from '../../../../lib/db';
+import { sendEmail } from '../../../../lib/email';
 
 interface Params { params: Promise<{ id: string }> }
 
@@ -59,28 +60,21 @@ export async function POST(req: NextRequest, { params }: Params) {
         `, [app.ApplicationID]);
       }
 
-      // Simulate sending bulk email notification
-      const fs = require('fs');
-      const path = require('path');
-      const mockLogDir = path.join(process.cwd(), 'scratch');
-      if (!fs.existsSync(mockLogDir)) {
-        fs.mkdirSync(mockLogDir, { recursive: true });
-      }
-      const logPath = path.join(mockLogDir, 'mock_emails.log');
-      const emailMessage = 
-        `================ MOCK EMAIL DISPATCH =================\n` +
-        `Date: ${new Date().toISOString()}\n` +
-        `To: ${app.Email}\n` +
-        `Subject: Interview Invitation: ${app.FullName} for ${app.JobTitle} at RIE-AGL\n\n` +
+      // Send interview invitation email (uses SMTP if configured, falls back to logging)
+      const emailText = 
         `Dear ${app.FullName},\n\n` +
         `Congratulations! Based on our automated CV screening and analysis, we would love to invite you for a Video Interview for the ${app.JobTitle} position.\n\n` +
         `Please use the link below to join your interview:\n` +
         `Meeting Link: https://meet.google.com/rie-agl-interview\n\n` +
         `Best regards,\n` +
         `HR Recruitment Team\n` +
-        `RIE-AGL Careers\n` +
-        `======================================================\n\n`;
-      fs.appendFileSync(logPath, emailMessage);
+        `RIE-AGL Careers`;
+
+      await sendEmail({
+        to: app.Email,
+        subject: `Interview Invitation: ${app.FullName} for ${app.JobTitle} at RIE-AGL`,
+        text: emailText,
+      });
     }
 
     return NextResponse.json({
