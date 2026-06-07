@@ -184,7 +184,7 @@ async function processApplication(applicationId) {
 
   // 1. Fetch application details
   const appRows = await dbQuery(`
-    SELECT a.ApplicantID, a.JobID, a.ApplicationStatus, r.CVUrl
+    SELECT a.ApplicantID, a.JobID, a.ApplicationStatus, r.CVUrl, r.ResumeID
     FROM Applications a
     LEFT JOIN Resumes r ON r.ApplicantID = a.ApplicantID
     WHERE a.ApplicationID = ?
@@ -194,7 +194,7 @@ async function processApplication(applicationId) {
     throw new Error(`Application with ID ${applicationId} not found in database.`);
   }
 
-  const { ApplicantID, JobID, CVUrl } = appRows[0];
+  const { ApplicantID, JobID, CVUrl, ResumeID } = appRows[0];
 
   // 2. Set status to 'scoring' (indicates AI screening in progress)
   await dbQuery(`
@@ -238,124 +238,167 @@ async function processApplication(applicationId) {
 
   let evaluationSuccess = false;
 
-  if (geminiApiKey && CVUrl && hasR2) {
+  if (CVUrl && hasR2) {
     try {
-      console.log(`[Worker] Live Gemini API and Cloudflare R2 detected. Downloading CV: ${CVUrl}`);
+      console.log(`[Worker] Cloudflare R2 detected. Downloading CV: ${CVUrl}`);
       const pdfBuffer = await downloadCV(CVUrl);
 
-      console.log('[Worker] File downloaded successfully. Calling Gemini API...');
-      const prompt = `
-        You are an expert AI recruiter for RIE-AGL Careers.
-        Your task is to evaluate the attached candidate CV (PDF) against the requirements of the job opening:
+      // Compute file hash (SHA-256) for exact match caching
+      const crypto = require('crypto');
+      const fileHash = crypto.createHash('sha256').update(pdfBuffer).digest('hex');
+      console.log(`[Worker] CV downloaded. File hash: ${fileHash}`);
 
-        Job Title: ${JobTitle}
-        Job Requirements:
-        ${JobRequirements || 'No specific requirements listed. Assess general fit for the job title.'}
-
-        Evaluate the candidate across the following dimensions:
-        1. Skills Match: How closely do the candidate's skills align with the requirements?
-        2. Experience Match: Does their career history match the expected level and scope?
-        3. Education Match: Do they have the required degrees or qualifications?
-        4. Certification Match: Do they hold the listed certifications or licenses?
-        5. Semantic Match: Does their overall profile fit the role description?
-        6. Resume Quality: Is the CV clean, well-formatted, professional, and clear?
-
-        Assign a score out of 100 for each dimension.
-        Calculate the Final Score as the mathematical average of the 6 dimensions (rounded to 1 decimal place).
-
-        Provide a recommendation category:
-        - "fast_track" (Final Score >= 90)
-        - "auto_invite" (Final Score 80-89)
-        - "hr_review" (Final Score 70-79)
-        - "feedback" (Final Score 60-69)
-        - "auto_reject" (Final Score < 60)
-
-        Provide a detailed summary (AISummary) explaining the evaluation, key strengths (semicolon-separated list), and weaknesses/areas to improve (semicolon-separated list).
-      `;
-
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  {
-                    inlineData: {
-                      mimeType: 'application/pdf',
-                      data: pdfBuffer.toString('base64'),
-                    },
-                  },
-                  {
-                    text: prompt,
-                  },
-                ],
-              },
-            ],
-            generationConfig: {
-              responseMimeType: 'application/json',
-              responseSchema: {
-                type: 'object',
-                properties: {
-                  skillsScore: { type: 'number' },
-                  experienceScore: { type: 'number' },
-                  educationScore: { type: 'number' },
-                  certificationScore: { type: 'number' },
-                  semanticScore: { type: 'number' },
-                  resumeQualityScore: { type: 'number' },
-                  finalScore: { type: 'number' },
-                  recommendation: {
-                    type: 'string',
-                    enum: ['fast_track', 'auto_invite', 'hr_review', 'feedback', 'auto_reject'],
-                  },
-                  aiSummary: { type: 'string' },
-                  strengths: { type: 'string' },
-                  weaknesses: { type: 'string' },
-                },
-                required: [
-                  'skillsScore',
-                  'experienceScore',
-                  'educationScore',
-                  'certificationScore',
-                  'semanticScore',
-                  'resumeQualityScore',
-                  'finalScore',
-                  'recommendation',
-                  'aiSummary',
-                  'strengths',
-                  'weaknesses',
-                ],
-              },
-            },
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`Gemini API returned status ${response.status}: ${errText}`);
+      // Save file hash to Resumes table
+      if (ResumeID) {
+        await dbQuery(`UPDATE Resumes SET FileHash = ? WHERE ResumeID = ?`, [fileHash, ResumeID]);
       }
 
-      const result = await response.json();
-      const jsonText = result.candidates[0].content.parts[0].text;
-      const evaluation = JSON.parse(jsonText);
+      // Check if we already have an evaluation for this identical CV and JobID
+      const cachedRows = await dbQuery(`
+        SELECT TOP 1 
+          ats.SkillsScore, ats.ExperienceScore, ats.EducationScore, 
+          ats.CertificationScore, ats.SemanticScore, ats.ResumeQualityScore, ats.FinalScore, 
+          ats.Recommendation, ae.AISummary, ae.Strengths, ae.Weaknesses
+        FROM Applications a
+        JOIN Resumes r ON r.ApplicantID = a.ApplicantID
+        JOIN ATS_Scores ats ON ats.ApplicationID = a.ApplicationID
+        JOIN AI_Evaluations ae ON ae.ApplicationID = a.ApplicationID
+        WHERE (r.FileHash = ? OR r.CVUrl = ?) AND a.JobID = ? AND a.ApplicationID <> ?
+      `, [fileHash, CVUrl, JobID, parseInt(applicationId)]);
 
-      skillsScore = evaluation.skillsScore;
-      experienceScore = evaluation.experienceScore;
-      educationScore = evaluation.educationScore;
-      certificationScore = evaluation.certificationScore;
-      semanticScore = evaluation.semanticScore;
-      resumeQualityScore = evaluation.resumeQualityScore;
-      finalScore = evaluation.finalScore;
-      recommendation = evaluation.recommendation;
-      aiSummary = evaluation.aiSummary;
-      strengths = evaluation.strengths;
-      weaknesses = evaluation.weaknesses;
+      if (cachedRows.length > 0) {
+        const cached = cachedRows[0];
+        skillsScore = parseFloat(cached.SkillsScore);
+        experienceScore = parseFloat(cached.ExperienceScore);
+        educationScore = parseFloat(cached.EducationScore);
+        certificationScore = parseFloat(cached.CertificationScore);
+        semanticScore = parseFloat(cached.SemanticScore);
+        resumeQualityScore = parseFloat(cached.ResumeQualityScore);
+        finalScore = parseFloat(cached.FinalScore);
+        recommendation = cached.Recommendation;
+        aiSummary = cached.AISummary;
+        strengths = cached.Strengths;
+        weaknesses = cached.Weaknesses;
+        evaluationSuccess = true;
+        console.log(`[Worker] Cache HIT! Found existing evaluation for identical CV (hash: ${fileHash}) and Job ID: ${JobID}. Reusing scores.`);
+      } else if (geminiApiKey) {
+        console.log('[Worker] Cache MISS. Calling Gemini API with temperature 0.0 for maximum consistency...');
+        const prompt = `
+          You are an expert AI recruiter for RIE-AGL Careers.
+          Your task is to evaluate the attached candidate CV (PDF) against the requirements of the job opening:
 
-      evaluationSuccess = true;
-      console.log(`[Worker] Live Gemini AI evaluation completed successfully for applicant ${FullName}.`);
+          Job Title: ${JobTitle}
+          Job Requirements:
+          ${JobRequirements || 'No specific requirements listed. Assess general fit for the job title.'}
+
+          Evaluate the candidate across the following dimensions:
+          1. Skills Match: How closely do the candidate's skills align with the requirements?
+          2. Experience Match: Does their career history match the expected level and scope?
+          3. Education Match: Do they have the required degrees or qualifications?
+          4. Certification Match: Do they hold the listed certifications or licenses?
+          5. Semantic Match: Does their overall profile fit the role description?
+          6. Resume Quality: Is the CV clean, well-formatted, professional, and clear?
+
+          Assign a score out of 100 for each dimension.
+          Calculate the Final Score as the mathematical average of the 6 dimensions (rounded to 1 decimal place).
+
+          Provide a recommendation category:
+          - "fast_track" (Final Score >= 90)
+          - "auto_invite" (Final Score 80-89)
+          - "hr_review" (Final Score 70-79)
+          - "feedback" (Final Score 60-69)
+          - "auto_reject" (Final Score < 60)
+
+          Provide a detailed summary (AISummary) explaining the evaluation, key strengths (semicolon-separated list), and weaknesses/areas to improve (semicolon-separated list).
+        `;
+
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [
+                {
+                  parts: [
+                    {
+                      inlineData: {
+                        mimeType: 'application/pdf',
+                        data: pdfBuffer.toString('base64'),
+                      },
+                    },
+                    {
+                      text: prompt,
+                    },
+                  ],
+                },
+              ],
+              generationConfig: {
+                responseMimeType: 'application/json',
+                temperature: 0.0,
+                responseSchema: {
+                  type: 'object',
+                  properties: {
+                    skillsScore: { type: 'number' },
+                    experienceScore: { type: 'number' },
+                    educationScore: { type: 'number' },
+                    certificationScore: { type: 'number' },
+                    semanticScore: { type: 'number' },
+                    resumeQualityScore: { type: 'number' },
+                    finalScore: { type: 'number' },
+                    recommendation: {
+                      type: 'string',
+                      enum: ['fast_track', 'auto_invite', 'hr_review', 'feedback', 'auto_reject'],
+                    },
+                    aiSummary: { type: 'string' },
+                    strengths: { type: 'string' },
+                    weaknesses: { type: 'string' },
+                  },
+                  required: [
+                    'skillsScore',
+                    'experienceScore',
+                    'educationScore',
+                    'certificationScore',
+                    'semanticScore',
+                    'resumeQualityScore',
+                    'finalScore',
+                    'recommendation',
+                    'aiSummary',
+                    'strengths',
+                    'weaknesses',
+                  ],
+                },
+              },
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const errText = await response.text();
+          throw new Error(`Gemini API returned status ${response.status}: ${errText}`);
+        }
+
+        const result = await response.json();
+        const jsonText = result.candidates[0].content.parts[0].text;
+        const evaluation = JSON.parse(jsonText);
+
+        skillsScore = evaluation.skillsScore;
+        experienceScore = evaluation.experienceScore;
+        educationScore = evaluation.educationScore;
+        certificationScore = evaluation.certificationScore;
+        semanticScore = evaluation.semanticScore;
+        resumeQualityScore = evaluation.resumeQualityScore;
+        finalScore = evaluation.finalScore;
+        recommendation = evaluation.recommendation;
+        aiSummary = evaluation.aiSummary;
+        strengths = evaluation.strengths;
+        weaknesses = evaluation.weaknesses;
+
+        evaluationSuccess = true;
+        console.log(`[Worker] Live Gemini AI evaluation completed successfully for applicant ${FullName}.`);
+      } else {
+        console.log('[Worker] No Gemini API key provided. Falling back to mock scoring.');
+      }
     } catch (apiError) {
       console.error('[Worker] Live Gemini AI evaluation failed, falling back to mock scoring:', apiError);
     }
