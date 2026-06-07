@@ -10,7 +10,8 @@ export const redisConfig = {
   password,
   maxRetriesPerRequest: null, // Required by BullMQ
   enableOfflineQueue: false,  // Fail fast if Redis is down
-  connectTimeout: 2000,       // Timeout after 2 seconds
+  connectTimeout: 5000,       // 5 seconds timeout for cloud DB
+  tls: host.includes('upstash.io') ? {} : undefined,
 };
 
 // Initialize shared connection client
@@ -25,7 +26,8 @@ export function getRedisConnection(): Redis {
       maxRetriesPerRequest: null,
       lazyConnect: true,
       enableOfflineQueue: false,
-      connectTimeout: 2000,
+      connectTimeout: 5000,
+      tls: host.includes('upstash.io') ? {} : undefined,
     });
     
     redisConnection.on('error', (err) => {

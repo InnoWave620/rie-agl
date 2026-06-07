@@ -33,6 +33,7 @@ const redisConfig = {
   host: redisHost,
   port: redisPort,
   password: redisPassword,
+  tls: redisHost.includes('upstash.io') ? {} : undefined,
 };
 
 // ─── SQL Server Configuration ───
