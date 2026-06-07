@@ -396,10 +396,30 @@ async function processApplication(applicationId) {
   }
 
   const logPath = path.join(mockLogDir, 'mock_emails.log');
-  const logMessage = `[${new Date().toISOString()}] To: ${Email} (${FullName}) | Job: ${JobTitle} | Status Update: ${nextStatus} | ATS Score: ${finalScore} | Recommendation: ${recommendation}\n`;
+  
+  let logMessage = '';
+  if (nextStatus === 'rejected') {
+    logMessage = 
+      `======================================================\n` +
+      `MOCK EMAIL DISPATCH: AUTO-REJECTION\n` +
+      `Date: ${new Date().toISOString()}\n` +
+      `To: ${Email} (${FullName})\n` +
+      `Subject: Update on your application for ${JobTitle} at RIE-AGL\n\n` +
+      `Dear ${FullName},\n\n` +
+      `Thank you for your interest in the ${JobTitle} position at RIE-AGL Careers and for taking the time to submit your CV.\n\n` +
+      `We have reviewed your qualifications, skills match, and experience (ATS compatibility score: ${finalScore}%) for this role. Unfortunately, we have decided not to proceed with your application at this time.\n\n` +
+      `We appreciate your interest in RIE-AGL and wish you all the best in your job search.\n\n` +
+      `Best regards,\n` +
+      `HR Recruitment Team\n` +
+      `RIE-AGL Careers\n` +
+      `======================================================\n\n`;
+    console.log(`[Worker] Auto-rejection email dispatched to ${Email}.`);
+  } else {
+    logMessage = `[${new Date().toISOString()}] To: ${Email} (${FullName}) | Job: ${JobTitle} | Status Update: ${nextStatus} | ATS Score: ${finalScore} | Recommendation: ${recommendation}\n`;
+  }
+  
   fs.appendFileSync(logPath, logMessage);
-
-  console.log(`[Worker] Simulated email notification dispatched to ${Email}. Logged in scratch/mock_emails.log.`);
+  console.log(`[Worker] Simulated email notification logged in scratch/mock_emails.log.`);
 }
 
 // ─── Start BullMQ Worker ───

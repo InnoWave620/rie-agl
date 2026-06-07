@@ -6,6 +6,7 @@ import { query } from '../../../lib/db';
 import { formatDate, formatRelativeTime, pluralize } from '../../../lib/utils';
 import { ArrowLeft, MapPin, Clock, Users, Eye, ExternalLink, Edit2, Inbox } from 'lucide-react';
 import type { Division, ApplicationStatus, DecisionCategory } from '../../../types';
+import TopCandidatesQueue from './TopCandidatesQueue';
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -211,6 +212,9 @@ export default async function JobDetailPage({ params }: Props) {
             ))}
           </div>
         </div>
+
+        {/* Top Candidates Queue */}
+        <TopCandidatesQueue jobId={job.id} applications={applications} />
 
         {/* Applicant Pipeline Table */}
         <div className="card overflow-hidden">
