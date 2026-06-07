@@ -175,7 +175,7 @@ export default function Sidebar({ user, onClose, mobileOpen }: SidebarProps) {
           alt="AGL Logo"
           className={cn(
             'object-contain brightness-0 invert transition-all duration-300 shrink-0',
-            collapsed ? 'h-7 w-7' : 'h-8 w-auto',
+            collapsed ? 'h-8 w-8' : 'h-[44px] w-auto',
           )}
         />
 

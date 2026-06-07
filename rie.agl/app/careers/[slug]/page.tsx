@@ -83,7 +83,7 @@ export default async function JobDetailPage({ params }: Props) {
 
       {/* ── Sticky Dark Navbar ── */}
       <nav className="sticky top-0 z-50 bg-[#0A0F24] border-b border-white/5">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
           <Link
             href="/careers"
             className="flex items-center gap-2 text-white/60 hover:text-white transition-colors duration-200 text-sm font-medium"
@@ -91,13 +91,16 @@ export default async function JobDetailPage({ params }: Props) {
             <ChevronLeft size={16} />
             <span>All Jobs</span>
           </Link>
-          <Link href="/careers" className="flex items-center gap-2.5 group">
+          <Link href="/careers" className="flex items-center gap-3.5 group">
             <img
               src="/AGL.logo.png"
               alt="AGL Logo"
-              className="h-8 w-auto object-contain brightness-0 invert group-hover:scale-105 transition-transform duration-200"
+              className="h-[48px] w-auto object-contain brightness-0 invert group-hover:scale-105 transition-transform duration-200"
             />
-            <span className="text-white font-semibold text-sm">AGL Careers</span>
+            <div>
+              <div className="text-white font-bold text-base leading-tight tracking-wide">AGL Careers</div>
+              <div className="text-white/40 text-xs leading-tight">Africa Global Logistics</div>
+            </div>
           </Link>
         </div>
       </nav>

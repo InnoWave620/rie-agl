@@ -166,20 +166,23 @@ export default function ApplicationFormPage({ params }: Props) {
 
       {/* ── Sticky Navbar ── */}
       <nav className="sticky top-0 z-50 bg-[#0A0F24] border-b border-white/5">
-        <div className="max-w-3xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div className="max-w-3xl mx-auto px-6 h-20 flex items-center justify-between">
           <Link
             href={`/careers/${slug}`}
             className="flex items-center gap-1.5 text-white/60 hover:text-white transition-colors text-sm font-medium"
           >
             <ChevronLeft size={16} /> Job Details
           </Link>
-          <Link href="/careers" className="flex items-center gap-2.5 group">
+          <Link href="/careers" className="flex items-center gap-3.5 group">
             <img
               src="/AGL.logo.png"
               alt="AGL Logo"
-              className="h-8 w-auto object-contain brightness-0 invert group-hover:scale-105 transition-transform"
+              className="h-[48px] w-auto object-contain brightness-0 invert group-hover:scale-105 transition-transform duration-200"
             />
-            <span className="text-white font-semibold text-sm hidden sm:block">AGL Careers</span>
+            <div>
+              <div className="text-white font-bold text-base leading-tight tracking-wide">AGL Careers</div>
+              <div className="text-white/40 text-xs leading-tight">Africa Global Logistics</div>
+            </div>
           </Link>
         </div>
       </nav>

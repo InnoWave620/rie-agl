@@ -138,15 +138,15 @@ export default function SignupPage() {
         <div className="pointer-events-none absolute bottom-20 -left-16 w-64 h-64 rounded-full bg-[#E66423]/20 blur-3xl" />
 
         {/* ── Logo ── */}
-        <div className="relative flex items-center gap-3 z-10">
+        <div className="relative flex items-center gap-3.5 z-10">
           <img
             src="/AGL.logo.png"
             alt="AGL Logo"
-            className="h-11 w-auto object-contain brightness-0 invert"
+            className="h-[48px] w-auto object-contain brightness-0 invert"
           />
           <div>
-            <div className="text-white font-bold text-lg leading-tight tracking-wide">AGL</div>
-            <div className="text-white/50 text-xs leading-tight tracking-widest uppercase">Recruitment Platform</div>
+            <div className="text-white font-bold text-xl leading-tight tracking-wide">AGL</div>
+            <div className="text-white/50 text-[11px] leading-tight tracking-widest uppercase">Recruitment Platform</div>
           </div>
         </div>
 
@@ -192,14 +192,14 @@ export default function SignupPage() {
           <div className="bg-white rounded-3xl shadow-xl shadow-[#001CB0]/8 p-10 transition-all duration-500 animate-[fadeSlideUp_0.45s_ease_both]">
 
             {/* Mobile logo */}
-            <div className="flex items-center gap-3 mb-6 lg:hidden">
+            <div className="flex items-center gap-3.5 mb-6 lg:hidden">
               <img
                 src="/AGL.logo.png"
                 alt="AGL Logo"
-                className="h-9 w-auto object-contain"
+                className="h-[44px] w-auto object-contain"
               />
               <div>
-                <div className="font-bold text-[#0A0F24]">AGL</div>
+                <div className="font-bold text-lg text-[#0A0F24] leading-tight">AGL</div>
                 <div className="text-xs text-gray-400">Recruitment Platform</div>
               </div>
             </div>
