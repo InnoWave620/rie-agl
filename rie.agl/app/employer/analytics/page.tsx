@@ -88,10 +88,9 @@ export default function AnalyticsPage() {
       icon: FileSearch, color: '#001CB0', bg: 'bg-blue-50',
     },
     {
-      label: 'Avg. Time-to-Hire', value: `${a.avgTimeToHire}d`, sub: 'Target: 21 days',
+      label: 'Avg. Screening Time', value: a.avgTimeToHire, sub: 'Target: instant grading',
       icon: Clock,
-      color: a.avgTimeToHire <= 21 ? '#22C55E' : '#F59E0B',
-      bg:   a.avgTimeToHire <= 21 ? 'bg-green-50' : 'bg-amber-50',
+      color: '#22C55E', bg: 'bg-green-50',
     },
     {
       label: 'CVs Screened / Day', value: a.cvScreenedToday, sub: 'AI-powered screening',
@@ -146,8 +145,8 @@ export default function AnalyticsPage() {
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
           <div className="bg-white rounded-2xl border border-[#E2E6EF] shadow-sm p-7 animate-fade-in-up" style={{ opacity: 0, animationDelay: '0.1s' }}>
             <div className="mb-6">
-              <h2 className="text-lg font-bold text-[#0A0F24]">Time-to-Hire Trend</h2>
-              <p className="text-sm text-[#535E75] mt-1">Monthly average vs. 21-day target</p>
+              <h2 className="text-lg font-bold text-[#0A0F24]">Screening Turnaround Trend</h2>
+              <p className="text-sm text-[#535E75] mt-1">Monthly average vs. 10-second target</p>
             </div>
             {a.timeToHireTrend.length > 0
               ? <TimeToHireChart data={a.timeToHireTrend} />

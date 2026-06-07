@@ -18,18 +18,18 @@ export function TimeToHireChart({ data }: { data: AnalyticsSummary['timeToHireTr
         <YAxis tick={{ fontSize: 12, fill: '#9CA3AF' }} />
         <Tooltip
           contentStyle={{ borderRadius: 8, border: '1px solid #E5E7EB', fontSize: 13 }}
-          formatter={(v, name) => [`${v} days`, name === 'avgDays' ? 'Avg. Time-to-Hire' : 'Target']}
+          formatter={(v, name) => [`${v}s`, name === 'avgDays' ? 'Avg. Screening Time' : 'Target']}
         />
-        <ReferenceLine y={21} stroke="#22C55E" strokeDasharray="4 4" strokeWidth={1.5} />
+        <ReferenceLine y={10} stroke="#22C55E" strokeDasharray="4 4" strokeWidth={1.5} />
         <Line
           type="monotone" dataKey="avgDays" stroke="#1C355E" strokeWidth={2.5}
           dot={{ r: 4, fill: '#1C355E', strokeWidth: 0 }}
           activeDot={{ r: 6 }}
-          name="Avg. Time-to-Hire"
+          name="Avg. Screening Time"
         />
         <Line
           type="monotone" dataKey="target" stroke="#22C55E" strokeWidth={2}
-          strokeDasharray="4 4" dot={false} name="Target (21 days)"
+          strokeDasharray="4 4" dot={false} name="Target (10s)"
         />
       </LineChart>
     </ResponsiveContainer>

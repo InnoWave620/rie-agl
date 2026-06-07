@@ -368,19 +368,15 @@ export default function EmployerDashboard() {
           delay: 0.14,
         },
         {
-          label: 'Avg. Time-to-Hire',
-          value: `${analytics.avgTimeToHire}d`,
-          sub: 'Target: 21 days',
+          label: 'Avg. Screening Time',
+          value: analytics.avgTimeToHire,
+          sub: 'Target: instant grading',
           icon: Clock,
-          iconBg:
-            analytics.avgTimeToHire <= 21 ? '#DCFCE7' : '#FEF3C7',
-          iconColor:
-            analytics.avgTimeToHire <= 21 ? '#16A34A' : '#D97706',
-          barColor:
-            analytics.avgTimeToHire <= 21 ? '#16A34A' : '#F59E0B',
-          trend: analytics.avgTimeToHire <= 21 ? 'up' : 'down',
-          trendLabel:
-            analytics.avgTimeToHire <= 21 ? 'On target' : 'Over target',
+          iconBg: '#DCFCE7',
+          iconColor: '#16A34A',
+          barColor: '#16A34A',
+          trend: 'up',
+          trendLabel: 'On target',
           delay: 0.21,
         },
       ]

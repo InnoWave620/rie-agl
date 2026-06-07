@@ -95,7 +95,7 @@ export async function GET() {
         totalApplications: Number(stats.totalApplications) || 0,
         openPositions:     Number(stats.openPositions)     || 0,
         avgAtsScore:       parseFloat(String(stats.avgAtsScore)) || 0,
-        avgTimeToHire:     23,   // TODO: derive from DB dates
+        avgTimeToHire:     "Seconds",
         hiresThisMonth:    Number(statusMap['Hired'] ?? statusMap['hired'] ?? 0),
         offersAccepted:    82,
         complianceScore:   100,

@@ -166,7 +166,7 @@ export interface RecruiterStat {
 export interface AnalyticsSummary {
   totalApplications: number;
   openPositions: number;
-  avgTimeToHire: number;
+  avgTimeToHire: string;
   avgAtsScore: number;
   hiresThisMonth: number;
   offersAccepted: number;
