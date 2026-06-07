@@ -236,7 +236,11 @@ export default async function JobDetailPage({ params }: Props) {
             {/* About AGL card */}
             <div className="bg-gradient-to-br from-[#0A0F24] to-[#001CB0] rounded-2xl p-6 text-white">
               <div className="flex items-center gap-2.5 mb-3">
-                <div className="w-8 h-8 rounded-lg bg-[#E66423] flex items-center justify-center text-xs font-black">AGL</div>
+                <img
+                  src="/AGL.logo.png"
+                  alt="AGL Logo"
+                  className="h-8 w-auto object-contain brightness-0 invert"
+                />
                 <span className="font-bold text-sm">About AGL</span>
               </div>
               <p className="text-xs leading-relaxed text-white/60">
