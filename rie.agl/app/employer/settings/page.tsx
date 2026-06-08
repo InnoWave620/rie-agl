@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Header from '../../components/layout/Header';
-import { Shield, Users, Bell, Database, Key, Plus, Edit2, Loader2, CheckCircle, Save, User, Camera, Upload, AlertCircle, ChevronDown } from 'lucide-react';
+import { Shield, Users, Bell, Database, Key, Plus, Edit2, Loader2, CheckCircle, Save, User, Camera, Upload, AlertCircle, ChevronDown, X } from 'lucide-react';
 
 const SETTING_TABS = [
   { key: 'profile',       label: 'My Profile',           icon: User },
@@ -48,6 +48,17 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+
+  // Invite Modal States
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteFullName, setInviteFullName] = useState('');
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [invitePassword, setInvitePassword] = useState('');
+  const [inviteRole, setInviteRole] = useState<'admin' | 'hr_manager' | 'recruiter'>('recruiter');
+  const [inviteDivision, setInviteDivision] = useState('');
+  const [inviteSubmitting, setInviteSubmitting] = useState(false);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/auth')
@@ -149,6 +160,51 @@ export default function SettingsPage() {
       setSaveError('Network error saving profile.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleInviteMember = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setInviteSubmitting(true);
+    setInviteError(null);
+    setInviteSuccess(null);
+
+    if (!inviteFullName.trim() || !inviteEmail.trim() || !invitePassword) {
+      setInviteError('All fields are required');
+      setInviteSubmitting(false);
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: inviteFullName,
+          email: inviteEmail,
+          password: invitePassword,
+          role: inviteRole,
+          division: inviteDivision,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setInviteSuccess('Team member invited successfully!');
+        // Refresh the user list
+        fetch('/api/users')
+          .then(r => r.json())
+          .then(d => { if (d.success) setUsers(d.data ?? []); });
+        
+        setTimeout(() => {
+          setShowInviteModal(false);
+        }, 1500);
+      } else {
+        setInviteError(data.error ?? 'Failed to invite team member.');
+      }
+    } catch {
+      setInviteError('Network error inviting team member.');
+    } finally {
+      setInviteSubmitting(false);
     }
   };
 
@@ -414,7 +470,19 @@ export default function SettingsPage() {
                     <h2 className="text-lg font-bold text-[#0A0F24]">Team Members</h2>
                     <p className="text-sm text-gray-400 mt-1 font-medium">Manage HR team access to the platform</p>
                   </div>
-                  <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-[#001CB0] hover:bg-[#0020CC] shadow-sm shadow-[#001CB0]/20 transition-all">
+                  <button
+                    onClick={() => {
+                      setInviteFullName('');
+                      setInviteEmail('');
+                      setInvitePassword('AGLTempPassword123!');
+                      setInviteRole('recruiter');
+                      setInviteDivision('Human Resources');
+                      setInviteError(null);
+                      setInviteSuccess(null);
+                      setShowInviteModal(true);
+                    }}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-[#001CB0] hover:bg-[#0020CC] shadow-sm shadow-[#001CB0]/20 transition-all"
+                  >
                     <Plus size={15} /> Invite Member
                   </button>
                 </div>
@@ -676,6 +744,154 @@ export default function SettingsPage() {
           </div>
         </div>
       </main>
+      {/* ── Invite Member Modal ── */}
+      {showInviteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0F24]/60 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-gray-150 overflow-hidden animate-fade-in-up">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+              <h3 className="font-bold text-[#0A0F24] flex items-center gap-2 text-base">
+                <Plus size={18} className="text-[#001CB0]" /> Invite Team Member
+              </h3>
+              <button
+                onClick={() => setShowInviteModal(false)}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleInviteMember}>
+              <div className="px-6 py-5 space-y-4">
+                {inviteError && (
+                  <div className="flex items-center gap-2 p-3 rounded-xl text-xs font-semibold bg-red-50 border border-red-150 text-red-600">
+                    <AlertCircle size={14} className="shrink-0" />
+                    {inviteError}
+                  </div>
+                )}
+                {inviteSuccess && (
+                  <div className="flex items-center gap-2 p-3 rounded-xl text-xs font-semibold bg-green-50 border border-green-150 text-green-700">
+                    <CheckCircle size={14} className="shrink-0" />
+                    {inviteSuccess}
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5" htmlFor="invite-name">
+                    Full Name
+                  </label>
+                  <input
+                    id="invite-name"
+                    type="text"
+                    required
+                    placeholder="e.g. Sarah Jenkins"
+                    className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                    value={inviteFullName}
+                    onChange={e => setInviteFullName(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5" htmlFor="invite-email">
+                    Email Address
+                  </label>
+                  <input
+                    id="invite-email"
+                    type="email"
+                    required
+                    placeholder="e.g. sarah.jenkins@agl.co.za"
+                    className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                    value={inviteEmail}
+                    onChange={e => setInviteEmail(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5" htmlFor="invite-password">
+                    Temporary Password
+                  </label>
+                  <input
+                    id="invite-password"
+                    type="text"
+                    required
+                    className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all font-mono"
+                    value={invitePassword}
+                    onChange={e => setInvitePassword(e.target.value)}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-505 uppercase tracking-wider mb-1.5" htmlFor="invite-role">
+                      Role
+                    </label>
+                    <div className="relative">
+                      <select
+                        id="invite-role"
+                        className="w-full appearance-none px-4 py-2.5 pr-8 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all cursor-pointer"
+                        value={inviteRole}
+                        onChange={e => setInviteRole(e.target.value as any)}
+                      >
+                        <option value="recruiter">Recruiter</option>
+                        <option value="hr_manager">HR Manager</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                      <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-505 uppercase tracking-wider mb-1.5" htmlFor="invite-division">
+                      Division
+                    </label>
+                    <div className="relative">
+                      <select
+                        id="invite-division"
+                        className="w-full appearance-none px-4 py-2.5 pr-8 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all cursor-pointer"
+                        value={inviteDivision}
+                        onChange={e => setInviteDivision(e.target.value)}
+                      >
+                        <option value="Human Resources">HR</option>
+                        <option value="Logistics">Logistics</option>
+                        <option value="IT & Tech">IT & Tech</option>
+                        <option value="Operations">Operations</option>
+                        <option value="Executive">Executive</option>
+                      </select>
+                      <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 px-6 py-5 border-t border-gray-100 bg-gray-50/50">
+                <button
+                  type="button"
+                  onClick={() => setShowInviteModal(false)}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-150 hover:text-gray-800 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={inviteSubmitting}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-white bg-[#001CB0] hover:bg-[#0020CC] shadow-md shadow-[#001CB0]/20 transition-all disabled:opacity-50"
+                >
+                  {inviteSubmitting ? (
+                    <>
+                      <Loader2 size={14} className="animate-spin" />
+                      Inviting…
+                    </>
+                  ) : (
+                    <>
+                      <Plus size={14} />
+                      Invite Member
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }

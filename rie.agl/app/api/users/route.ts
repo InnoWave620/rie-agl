@@ -115,3 +115,98 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
   }
 }
+
+// POST /api/users — Create/Invite a new user (admin/hr_manager action)
+export async function POST(req: NextRequest) {
+  try {
+    const token = req.cookies.get(COOKIE_NAME)?.value;
+    if (!token) {
+      return NextResponse.json({ success: false, error: 'Not authenticated' }, { status: 401 });
+    }
+
+    let session;
+    try {
+      session = await verifyToken(token);
+    } catch {
+      return NextResponse.json({ success: false, error: 'Invalid session' }, { status: 401 });
+    }
+
+    if (session.role !== 'admin' && session.role !== 'hr_manager') {
+      return NextResponse.json({ success: false, error: 'Not authorized to invite team members' }, { status: 403 });
+    }
+
+    const { fullName, email, password, role, division } = await req.json();
+
+    if (!fullName?.trim() || !email?.trim() || !password) {
+      return NextResponse.json(
+        { success: false, error: 'Full name, email, and password are required' },
+        { status: 400 }
+      );
+    }
+
+    if (password.length < 8) {
+      return NextResponse.json(
+        { success: false, error: 'Password must be at least 8 characters' },
+        { status: 400 }
+      );
+    }
+
+    const emailLower = email.trim().toLowerCase();
+
+    // Check if email already exists
+    const existing = await query<{ UserID: number }>(`
+      SELECT UserID FROM Users WHERE Email = ${esc(emailLower)}
+    `);
+
+    if (existing.length > 0) {
+      return NextResponse.json(
+        { success: false, error: 'A team member with this email already exists' },
+        { status: 409 }
+      );
+    }
+
+    // Hash password
+    const passwordHash = await bcrypt.hash(password, 12);
+
+    // Map role name
+    const roleName = role === 'admin'      ? 'Admin' :
+                     role === 'hr_manager' ? 'HR Manager' : 'Recruiter';
+    const dept = (division ?? 'Human Resources').trim();
+
+    // Insert user
+    const rows = await query<{ UserID: number }>(`
+      INSERT INTO Users (FullName, Email, RoleName, Department, PasswordHash, IsActive, CreatedDate)
+      OUTPUT INSERTED.UserID
+      VALUES (
+        ${esc(fullName.trim())},
+        ${esc(emailLower)},
+        ${esc(roleName)},
+        ${esc(dept)},
+        ${esc(passwordHash)},
+        1,
+        GETDATE()
+      )
+    `);
+
+    const newUserId = rows[0]?.UserID;
+    if (!newUserId) {
+      return NextResponse.json({ success: false, error: 'Failed to create team member' }, { status: 500 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Team member invited successfully',
+      data: {
+        id: String(newUserId),
+        fullName: fullName.trim(),
+        email: emailLower,
+        role,
+        division
+      }
+    }, { status: 201 });
+  } catch (error) {
+    console.error('[POST /api/users]', error);
+    return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
+  }
+}
+
