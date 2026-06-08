@@ -115,6 +115,12 @@ export default function CandidateProfilePage({ params }: Props) {
     { key: 'notes'       as const, label: 'HR Notes',    icon: StickyNote },
   ];
 
+  useEffect(() => {
+    if (application) {
+      setInvited(application.status === 'interview_invited');
+    }
+  }, [application]);
+
   // Parse strengths/weaknesses (stored as comma-separated or free text)
   const strengthsList = application?.strengths
     ? application.strengths.split(/[,;]/).map(s => s.trim()).filter(Boolean)
@@ -226,28 +232,31 @@ export default function CandidateProfilePage({ params }: Props) {
             <div className="card p-5">
               <h3 className="font-bold text-xs uppercase tracking-wider text-gray-400 mb-4">Actions</h3>
               <div className="space-y-2.5">
-                {!invited ? (
-                  <button
-                    onClick={() => setShowInviteModal(true)}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-white bg-green-500 hover:bg-green-600 shadow-sm shadow-green-500/20 transition-all"
-                  >
-                    <Send size={14} /> Send Interview Invite
-                  </button>
-                ) : (
-                  <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-green-700 bg-green-50 border border-green-200">
-                    <CheckCircle size={15} /> Interview invited
-                  </div>
+                {application?.status !== 'rejected' && (
+                  <>
+                    {!invited ? (
+                      <button
+                        onClick={() => setShowInviteModal(true)}
+                        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-white bg-green-500 hover:bg-green-600 shadow-sm shadow-green-500/20 transition-all"
+                      >
+                        <Send size={14} /> Send Interview Invite
+                      </button>
+                    ) : (
+                      <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-green-700 bg-green-50 border border-green-200">
+                        <CheckCircle size={15} /> Interview invited
+                      </div>
+                    )}
+                  </>
                 )}
 
                 <button className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-[#001CB0] bg-[#001CB0]/10 hover:bg-[#001CB0]/20 transition-all">
                   <ThumbsUp size={14} /> Promote to HR Review
                 </button>
-                <button className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 transition-all border border-amber-200">
-                  <RefreshCw size={14} /> Re-evaluate
-                </button>
-                <button className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all border border-red-200">
-                  <ThumbsDown size={14} /> Reject Candidate
-                </button>
+                {application?.status !== 'rejected' && (
+                  <button className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-red-600 bg-red-50 hover:bg-red-100 transition-all border border-red-200">
+                    <ThumbsDown size={14} /> Reject Candidate
+                  </button>
+                )}
                 <a
                   href={`/api/candidates/${candidate.id}/cv`}
                   target="_blank"
