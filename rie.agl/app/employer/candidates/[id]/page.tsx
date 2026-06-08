@@ -56,6 +56,10 @@ export default function CandidateProfilePage({ params }: Props) {
   const [invited, setInvited] = useState(false);
   const [notes, setNotes] = useState('');
 
+  const application = candidate
+    ? (appId ? candidate.applications.find(a => a.id === appId) ?? candidate.applications[0] : candidate.applications[0])
+    : null;
+
   useEffect(() => {
     fetch(`/api/candidates/${id}`)
       .then(r => r.json())
@@ -66,6 +70,12 @@ export default function CandidateProfilePage({ params }: Props) {
       .catch(() => setNotFound(true))
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    if (application) {
+      setInvited(application.status === 'interview_invited');
+    }
+  }, [application]);
 
   if (loading) {
     return (
@@ -100,11 +110,6 @@ export default function CandidateProfilePage({ params }: Props) {
     );
   }
 
-  // Pick the relevant application
-  const application = appId
-    ? candidate.applications.find(a => a.id === appId) ?? candidate.applications[0]
-    : candidate.applications[0];
-
   const job = application
     ? { id: application.jobId, title: application.jobTitle, division: 'Logistics' as Division, location: '', country: '' }
     : null;
@@ -115,11 +120,6 @@ export default function CandidateProfilePage({ params }: Props) {
     { key: 'notes'       as const, label: 'HR Notes',    icon: StickyNote },
   ];
 
-  useEffect(() => {
-    if (application) {
-      setInvited(application.status === 'interview_invited');
-    }
-  }, [application]);
 
   // Parse strengths/weaknesses (stored as comma-separated or free text)
   const strengthsList = application?.strengths
