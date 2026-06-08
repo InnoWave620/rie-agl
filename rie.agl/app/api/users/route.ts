@@ -9,6 +9,7 @@ interface DBUser {
   FullName: string;
   Email: string;
   RoleName: string;
+  Department?: string | null;
   CreatedDate?: Date | string;
   AvatarUrl?: string | null;
 }
@@ -17,7 +18,7 @@ interface DBUser {
 export async function GET() {
   try {
     const rows = await query<DBUser>(`
-      SELECT UserID, FullName, Email, RoleName, CreatedDate, AvatarUrl
+      SELECT UserID, FullName, Email, RoleName, Department, CreatedDate, AvatarUrl
       FROM Users
       ORDER BY UserID ASC
     `);
@@ -35,7 +36,7 @@ export async function GET() {
         lastName,
         email:          r.Email ?? '',
         role:           (r.RoleName ?? 'recruiter').toLowerCase().replace(/\s+/g, '_'),
-        division:       undefined as string | undefined,
+        division:       r.Department ?? undefined,
         avatarInitials: initials.toUpperCase(),
         avatarUrl:      r.AvatarUrl ?? undefined,
         createdAt:      r.CreatedDate ? new Date(r.CreatedDate).toISOString() : '',
@@ -49,7 +50,7 @@ export async function GET() {
   }
 }
 
-// PUT /api/users — Update the current user's profile information
+// PUT /api/users — Update profile information (current user or another team member)
 export async function PUT(req: NextRequest) {
   try {
     const token = req.cookies.get(COOKIE_NAME)?.value;
@@ -64,20 +65,30 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Invalid session' }, { status: 401 });
     }
 
-    const { firstName, lastName, email, role, avatarUrl, password } = await req.json();
+    const { userId, firstName, lastName, email, role, avatarUrl, password, division } = await req.json();
 
     if (!firstName || !email) {
       return NextResponse.json({ success: false, error: 'First name and email are required' }, { status: 400 });
     }
 
+    const targetUserId = userId ? Number(userId) : Number(session.userId);
+    const isSelf = targetUserId === Number(session.userId);
+
+    // Permission check: if editing someone else, caller must be admin or hr_manager
+    if (!isSelf && session.role !== 'admin' && session.role !== 'hr_manager') {
+      return NextResponse.json({ success: false, error: 'Not authorized to update other team members' }, { status: 403 });
+    }
+
     const fullName = `${firstName.trim()} ${lastName?.trim() || ''}`.trim();
     const dbRole = role === 'admin' ? 'Admin' : role === 'hr_manager' ? 'HR Manager' : 'Recruiter';
+    const dept = (division ?? 'Human Resources').trim();
 
     let queryStr = `
       UPDATE Users
       SET FullName = ${esc(fullName)},
           Email = ${esc(email.trim().toLowerCase())},
           RoleName = ${esc(dbRole)},
+          Department = ${esc(dept)},
           AvatarUrl = ${avatarUrl ? esc(avatarUrl) : 'NULL'}
     `;
 
@@ -89,27 +100,30 @@ export async function PUT(req: NextRequest) {
       queryStr += `, PasswordHash = ${esc(hashedPassword)}`;
     }
 
-    queryStr += ` WHERE UserID = ${Number(session.userId)}`;
+    queryStr += ` WHERE UserID = ${targetUserId}`;
 
     await query(queryStr);
 
-    // Re-generate a session token with the updated details
-    const nameParts = fullName.trim().split(/\s+/);
-    const updatedInitials = nameParts.map(p => p[0]?.toUpperCase() ?? '').slice(0, 2).join('');
-    const newSession: AuthSession = {
-      userId:         session.userId,
-      email:          email.trim().toLowerCase(),
-      firstName:      firstName.trim(),
-      lastName:       lastName?.trim() || '',
-      role:           role,
-      avatarInitials: updatedInitials || 'U',
-      avatarUrl:      avatarUrl || undefined,
-    };
+    if (isSelf) {
+      const nameParts = fullName.trim().split(/\s+/);
+      const updatedInitials = nameParts.map(p => p[0]?.toUpperCase() ?? '').slice(0, 2).join('');
+      const newSession: AuthSession = {
+        userId:         String(targetUserId),
+        email:          email.trim().toLowerCase(),
+        firstName:      firstName.trim(),
+        lastName:       lastName?.trim() || '',
+        role:           role,
+        avatarInitials: updatedInitials || 'U',
+        avatarUrl:      avatarUrl || undefined,
+      };
 
-    const newToken = await createToken(newSession);
-    const response = NextResponse.json({ success: true, data: { user: newSession } });
-    response.cookies.set(COOKIE_NAME, newToken, cookieOptions(60 * 60 * 8)); // 8 hours
-    return response;
+      const newToken = await createToken(newSession);
+      const response = NextResponse.json({ success: true, data: { user: newSession, isSelf: true } });
+      response.cookies.set(COOKIE_NAME, newToken, cookieOptions(60 * 60 * 8)); // 8 hours
+      return response;
+    }
+
+    return NextResponse.json({ success: true, data: { isSelf: false } });
   } catch (error) {
     console.error('[PUT /api/users]', error);
     return NextResponse.json({ success: false, error: String(error) }, { status: 500 });

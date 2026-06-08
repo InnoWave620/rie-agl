@@ -60,6 +60,19 @@ export default function SettingsPage() {
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
 
+  // Edit Modal States
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingUser, setEditingUser] = useState<DBUser | null>(null);
+  const [editFirstName, setEditFirstName] = useState('');
+  const [editLastName, setEditLastName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editPassword, setEditPassword] = useState('');
+  const [editRole, setEditRole] = useState<'admin' | 'hr_manager' | 'recruiter'>('recruiter');
+  const [editDivision, setEditDivision] = useState('');
+  const [editSubmitting, setEditSubmitting] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [editSuccess, setEditSuccess] = useState<string | null>(null);
+
   useEffect(() => {
     fetch('/api/auth')
       .then(r => r.json())
@@ -205,6 +218,55 @@ export default function SettingsPage() {
       setInviteError('Network error inviting team member.');
     } finally {
       setInviteSubmitting(false);
+    }
+  };
+
+  const handleEditMember = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+
+    setEditSubmitting(true);
+    setEditError(null);
+    setEditSuccess(null);
+
+    if (!editFirstName.trim() || !editEmail.trim()) {
+      setEditError('First name and email are required');
+      setEditSubmitting(false);
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/users', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: editingUser.id,
+          firstName: editFirstName,
+          lastName: editLastName,
+          email: editEmail,
+          role: editRole,
+          division: editDivision,
+          password: editPassword,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setEditSuccess('Team member updated successfully!');
+        // Refresh the user list
+        fetch('/api/users')
+          .then(r => r.json())
+          .then(d => { if (d.success) setUsers(d.data ?? []); });
+
+        setTimeout(() => {
+          setShowEditModal(false);
+        }, 1500);
+      } else {
+        setEditError(data.error ?? 'Failed to update team member.');
+      }
+    } catch {
+      setEditError('Network error updating team member.');
+    } finally {
+      setEditSubmitting(false);
     }
   };
 
@@ -545,7 +607,21 @@ export default function SettingsPage() {
                               </span>
                             </td>
                             <td className="px-7 py-5">
-                              <button className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#001CB0] hover:bg-[#001CB0]/10 transition-all">
+                              <button
+                                onClick={() => {
+                                  setEditingUser(user);
+                                  setEditFirstName(user.firstName);
+                                  setEditLastName(user.lastName);
+                                  setEditEmail(user.email);
+                                  setEditPassword('');
+                                  setEditRole(user.role as any);
+                                  setEditDivision(user.division ?? 'Human Resources');
+                                  setEditError(null);
+                                  setEditSuccess(null);
+                                  setShowEditModal(true);
+                                }}
+                                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#001CB0] hover:bg-[#001CB0]/10 transition-all"
+                              >
                                 <Edit2 size={13} />
                               </button>
                             </td>
@@ -884,6 +960,169 @@ export default function SettingsPage() {
                     <>
                       <Plus size={14} />
                       Invite Member
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* ── Edit Member Modal ── */}
+      {showEditModal && editingUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0F24]/60 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-gray-150 overflow-hidden animate-fade-in-up">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+              <h3 className="font-bold text-[#0A0F24] flex items-center gap-2 text-base">
+                <Edit2 size={16} className="text-[#001CB0]" /> Edit Team Member
+              </h3>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleEditMember}>
+              <div className="px-6 py-5 space-y-4">
+                {editError && (
+                  <div className="flex items-center gap-2 p-3 rounded-xl text-xs font-semibold bg-red-50 border border-red-150 text-red-600">
+                    <AlertCircle size={14} className="shrink-0" />
+                    {editError}
+                  </div>
+                )}
+                {editSuccess && (
+                  <div className="flex items-center gap-2 p-3 rounded-xl text-xs font-semibold bg-green-50 border border-green-150 text-green-700">
+                    <CheckCircle size={14} className="shrink-0" />
+                    {editSuccess}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-505 uppercase tracking-wider mb-1.5" htmlFor="edit-firstname">
+                      First Name
+                    </label>
+                    <input
+                      id="edit-firstname"
+                      type="text"
+                      required
+                      placeholder="First Name"
+                      className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                      value={editFirstName}
+                      onChange={e => setEditFirstName(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-505 uppercase tracking-wider mb-1.5" htmlFor="edit-lastname">
+                      Last Name
+                    </label>
+                    <input
+                      id="edit-lastname"
+                      type="text"
+                      placeholder="Last Name"
+                      className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                      value={editLastName}
+                      onChange={e => setEditLastName(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-505 uppercase tracking-wider mb-1.5" htmlFor="edit-email">
+                    Email Address
+                  </label>
+                  <input
+                    id="edit-email"
+                    type="email"
+                    required
+                    placeholder="Email Address"
+                    className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                    value={editEmail}
+                    onChange={e => setEditEmail(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-505 uppercase tracking-wider mb-1.5" htmlFor="edit-password">
+                    Password <span className="font-normal text-gray-400 normal-case">(leave blank to keep unchanged)</span>
+                  </label>
+                  <input
+                    id="edit-password"
+                    type="password"
+                    placeholder="New Password"
+                    className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                    value={editPassword}
+                    onChange={e => setEditPassword(e.target.value)}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-505 uppercase tracking-wider mb-1.5" htmlFor="edit-role">
+                      Role
+                    </label>
+                    <div className="relative">
+                      <select
+                        id="edit-role"
+                        className="w-full appearance-none px-4 py-2.5 pr-8 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all cursor-pointer"
+                        value={editRole}
+                        onChange={e => setEditRole(e.target.value as any)}
+                      >
+                        <option value="recruiter">Recruiter</option>
+                        <option value="hr_manager">HR Manager</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                      <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-gray-505 uppercase tracking-wider mb-1.5" htmlFor="edit-division">
+                      Division
+                    </label>
+                    <div className="relative">
+                      <select
+                        id="edit-division"
+                        className="w-full appearance-none px-4 py-2.5 pr-8 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all cursor-pointer"
+                        value={editDivision}
+                        onChange={e => setEditDivision(e.target.value)}
+                      >
+                        <option value="Human Resources">HR</option>
+                        <option value="Logistics">Logistics</option>
+                        <option value="IT & Tech">IT & Tech</option>
+                        <option value="Operations">Operations</option>
+                        <option value="Executive">Executive</option>
+                      </select>
+                      <ChevronDown size={14} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 px-6 py-5 border-t border-gray-100 bg-gray-50/50">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-150 hover:text-gray-800 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={editSubmitting}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-white bg-[#001CB0] hover:bg-[#0020CC] shadow-md shadow-[#001CB0]/20 transition-all disabled:opacity-50"
+                >
+                  {editSubmitting ? (
+                    <>
+                      <Loader2 size={14} className="animate-spin" />
+                      Saving…
+                    </>
+                  ) : (
+                    <>
+                      <Save size={14} />
+                      Save Changes
                     </>
                   )}
                 </button>
