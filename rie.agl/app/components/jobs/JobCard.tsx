@@ -21,8 +21,8 @@ export default function JobCard({ job, variant = 'public' }: JobCardProps) {
         <div className="flex gap-2 flex-wrap">
           <DivisionBadge division={job.division} />
           <span
-            className="badge"
-            style={{ background: '#EEF2F9', color: '#1C355E' }}
+            className="badge font-bold"
+            style={{ background: '#e0f2fe', color: '#087ebf' }}
           >
             {job.experienceLevel}
           </span>
@@ -77,10 +77,10 @@ export default function JobCard({ job, variant = 'public' }: JobCardProps) {
         )}
         <Link
           href={href}
-          className="btn btn-sm"
+          className="btn btn-sm font-bold"
           style={{
-            background: variant === 'public' ? '#F58220' : '#1C355E',
-            color: 'white',
+            background: '#edc047',
+            color: '#1b365f',
           }}
         >
           {variant === 'public' ? 'View & Apply' : 'Manage'}

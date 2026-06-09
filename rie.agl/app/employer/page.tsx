@@ -566,8 +566,8 @@ export default function EmployerDashboard() {
                 <Link
                   href="/employer/analytics"
                   className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg
-                             border-2 border-[#001CB0] text-[#001CB0] text-sm font-semibold
-                             hover:bg-[#001CB0] hover:text-white transition-all duration-200"
+                             border-2 border-[#edc047] text-[#1b365f] text-sm font-bold bg-[#edc047]/10
+                             hover:bg-[#edc047] transition-all duration-200"
                 >
                   <BarChart3 size={15} />
                   Full Analytics
@@ -592,8 +592,8 @@ export default function EmployerDashboard() {
               <Link
                 href="/employer/jobs/new"
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg
-                           bg-[#001CB0] text-white text-xs font-semibold
-                           hover:bg-[#0025d4] transition-colors shadow-sm"
+                            bg-[#edc047] text-[#1b365f] text-xs font-bold
+                            hover:bg-[#e0b236] transition-colors shadow-sm"
               >
                 <Plus size={13} />
                 Post Job

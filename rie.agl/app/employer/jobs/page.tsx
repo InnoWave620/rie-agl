@@ -71,7 +71,7 @@ export default function JobsPage() {
           </div>
           <Link
             href="/employer/jobs/new"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#001CB0] to-[#0025E0] text-white text-sm font-semibold shadow-sm hover:shadow-md hover:opacity-95 transition-all duration-200"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#edc047] text-[#1b365f] text-sm font-bold shadow-sm hover:bg-[#e0b236] transition-all duration-200"
           >
             <Plus size={15} />
             New Job
@@ -91,7 +91,7 @@ export default function JobsPage() {
                 onClick={() => setStatus(s.value)}
                 className={`px-5 py-2.5 text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
                   status === s.value
-                    ? 'bg-gradient-to-r from-[#001CB0] to-[#0025E0] text-white'
+                    ? 'bg-[#edc047] text-[#1b365f] font-bold'
                     : 'text-[#535E75] hover:bg-[#F4F6F9]'
                 }`}
               >
@@ -99,7 +99,7 @@ export default function JobsPage() {
                 <span
                   className={`px-1.5 py-0.5 rounded text-xs font-bold ${
                     status === s.value
-                      ? 'bg-white/20 text-white'
+                      ? 'bg-[#1b365f]/15 text-[#1b365f]'
                       : 'bg-[#F4F6F9] text-[#535E75]'
                   }`}
                 >
@@ -138,7 +138,7 @@ export default function JobsPage() {
               onClick={() => setView('grid')}
               className={`p-2 rounded-lg transition-all duration-200 ${
                 view === 'grid'
-                  ? 'bg-[#001CB0] text-white shadow-sm'
+                  ? 'bg-[#edc047] text-[#1b365f] shadow-sm'
                   : 'text-[#535E75] hover:bg-[#F4F6F9]'
               }`}
               title="Grid view"
@@ -149,7 +149,7 @@ export default function JobsPage() {
               onClick={() => setView('list')}
               className={`p-2 rounded-lg transition-all duration-200 ${
                 view === 'list'
-                  ? 'bg-[#001CB0] text-white shadow-sm'
+                  ? 'bg-[#edc047] text-[#1b365f] shadow-sm'
                   : 'text-[#535E75] hover:bg-[#F4F6F9]'
               }`}
               title="List view"
@@ -223,7 +223,7 @@ export default function JobsPage() {
             </div>
             <Link
               href="/employer/jobs/new"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#001CB0] to-[#0025E0] text-white text-sm font-semibold shadow-sm hover:shadow-md hover:opacity-95 transition-all duration-200"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#edc047] text-[#1b365f] text-sm font-bold shadow-sm hover:bg-[#e0b236] transition-all duration-200"
             >
               <Plus size={15} />
               Create Job Posting

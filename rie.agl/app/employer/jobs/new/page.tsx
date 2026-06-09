@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Header from '../../../components/layout/Header';
-import { ArrowLeft, Save, Eye, Loader2, Sparkles, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Save, Eye, Loader2, Sparkles, CheckCircle, UploadCloud, FileText, X, AlertCircle } from 'lucide-react';
 import type { Division, Region, EmploymentType, ExperienceLevel } from '../../../types';
 import { generateSlug } from '../../../lib/utils';
 
@@ -24,6 +24,12 @@ export default function NewJobPage() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  // AI Extraction State
+  const [parsing, setParsing] = useState(false);
+  const [parseError, setParseError] = useState<string | null>(null);
+  const [parseSuccess, setParseSuccess] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
 
   const [form, setForm] = useState({
     title: '',
@@ -60,6 +66,79 @@ export default function NewJobPage() {
     }
   }
 
+  const handleFileChange = async (file: File) => {
+    if (!file) return;
+    
+    const name = file.name.toLowerCase();
+    if (!name.endsWith('.pdf') && !name.endsWith('.docx')) {
+      setParseError('Unsupported file type. Please upload a PDF or Word document (.docx).');
+      setParseSuccess(false);
+      return;
+    }
+
+    setParsing(true);
+    setParseError(null);
+    setParseSuccess(false);
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch('/api/jobs/parse-spec', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to parse the document.');
+      }
+
+      const extracted = data.data;
+      
+      setForm({
+        title: extracted.title || '',
+        summary: extracted.summary || '',
+        description: extracted.description || '',
+        division: (extracted.division || 'Port') as Division,
+        region: (extracted.region || 'West Africa') as Region,
+        location: extracted.location || '',
+        country: extracted.country || '',
+        employmentType: (extracted.employmentType || 'full_time') as EmploymentType,
+        experienceLevel: (extracted.experienceLevel || 'Mid') as ExperienceLevel,
+        closingDate: '',
+        requirements: extracted.requirements || '',
+      });
+
+      setParseSuccess(true);
+    } catch (err: any) {
+      console.error(err);
+      setParseError(err.message || 'An error occurred while parsing the file. Please try again.');
+    } finally {
+      setParsing(false);
+    }
+  };
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFileChange(e.dataTransfer.files[0]);
+    }
+  };
+
   return (
     <>
       {/* Page Header */}
@@ -90,8 +169,122 @@ export default function NewJobPage() {
             </div>
           )}
 
-          <div className="p-6">
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <div className="p-6 space-y-6">
+            {/* AI Document Upload Section */}
+            <div className="bg-white rounded-2xl border border-[#E2E6EF] shadow-sm p-6 overflow-hidden relative transition-all duration-300">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#001CB0]/10 to-transparent rounded-bl-full pointer-events-none" />
+              
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="text-[#001CB0]" size={18} />
+                    <h2 className="text-base font-bold text-[#0A0F24]">AI Job Spec Extractor</h2>
+                    <span className="bg-[#001CB0]/10 text-[#001CB0] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider animate-pulse">
+                      AI Powered
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#535E75] mt-1">
+                    Upload a Word document (.docx) or PDF job spec to automatically pre-fill details, requirements, and settings.
+                  </p>
+                </div>
+              </div>
+
+              <div
+                onDragEnter={handleDrag}
+                onDragOver={handleDrag}
+                onDragLeave={handleDrag}
+                onDrop={handleDrop}
+                className={`relative border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center transition-all duration-300 ${
+                  dragActive
+                    ? 'border-[#001CB0] bg-[#001CB0]/5 scale-[1.01] shadow-sm'
+                    : 'border-[#E2E6EF] hover:border-[#001CB0] hover:bg-[#F8FAFC]'
+                }`}
+              >
+                <input
+                  type="file"
+                  id="job-spec-upload"
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                  accept=".pdf,.docx"
+                  onChange={(e) => e.target.files && handleFileChange(e.target.files[0])}
+                  disabled={parsing}
+                />
+
+                {parsing ? (
+                  <div className="space-y-3 py-4">
+                    <div className="flex justify-center">
+                      <div className="relative">
+                        <Loader2 className="animate-spin text-[#001CB0]" size={36} />
+                        <Sparkles className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[#0025E0] animate-pulse" size={14} />
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-[#0A0F24]">AI is Analyzing Your Document...</h4>
+                      <p className="text-xs text-[#535E75] mt-1">Extracting job details, requirements, and formatting the description...</p>
+                    </div>
+                  </div>
+                ) : parseSuccess ? (
+                  <div className="space-y-3 py-2">
+                    <div className="flex justify-center">
+                      <div className="bg-green-50 p-2.5 rounded-full border border-green-200 text-green-600">
+                        <CheckCircle size={24} className="animate-bounce" />
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-green-700">Form Auto-filled Successfully!</h4>
+                      <p className="text-xs text-green-600/90 mt-1">Title, description, requirements, and settings have been populated. Please review below.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setParseSuccess(false);
+                      }}
+                      className="inline-flex items-center gap-1 text-xs text-[#535E75] hover:text-[#0A0F24] font-semibold mt-2 px-3 py-1.5 rounded-lg border border-[#E2E6EF] bg-white hover:bg-gray-50 transition-colors pointer-events-auto relative z-10"
+                    >
+                      Clear Success State
+                    </button>
+                  </div>
+                ) : parseError ? (
+                  <div className="space-y-3 py-2">
+                    <div className="flex justify-center">
+                      <div className="bg-red-50 p-2.5 rounded-full border border-red-200 text-red-600">
+                        <AlertCircle size={24} />
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-red-700">Extraction Failed</h4>
+                      <p className="text-xs text-red-600/90 mt-1">{parseError}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setParseError(null);
+                      }}
+                      className="inline-flex items-center gap-1 text-xs text-[#535E75] hover:text-[#0A0F24] font-semibold mt-2 px-3 py-1.5 rounded-lg border border-[#E2E6EF] bg-white hover:bg-gray-50 transition-colors pointer-events-auto relative z-10"
+                    >
+                      Try Again
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex justify-center">
+                      <div className="bg-[#001CB0]/5 p-3 rounded-full border border-[#001CB0]/10 text-[#001CB0]">
+                        <UploadCloud size={24} />
+                      </div>
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-[#0A0F24]">
+                        Drag &amp; drop job specification file, or <span className="text-[#001CB0] hover:underline decoration-2 font-semibold">browse</span>
+                      </h4>
+                      <p className="text-xs text-[#535E75] mt-1">Supports PDF and Word Document (.docx) up to 10MB</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
             {/* ── Main Form (left 2/3) ── */}
             <div className="xl:col-span-2 space-y-6">
 
@@ -229,7 +422,7 @@ export default function NewJobPage() {
               {/* Publish Actions */}
               <div className="bg-white rounded-2xl border border-[#E2E6EF] shadow-sm p-5 space-y-3">
                 <button
-                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#001CB0] to-[#0025E0] text-white text-sm font-semibold shadow-sm hover:shadow-md hover:opacity-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#edc047] text-[#1b365f] text-sm font-bold shadow-sm hover:bg-[#e0b236] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={() => handleSave('published')}
                   disabled={saving || !form.title || !form.description}
                 >

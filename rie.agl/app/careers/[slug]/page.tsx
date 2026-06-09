@@ -124,7 +124,7 @@ export default async function JobDetailPage({ params }: Props) {
             <div className="card p-8">
               <div className="flex flex-wrap gap-2 mb-5">
                 <DivisionBadge division={job.division} />
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#001CB0]/10 text-[#001CB0]">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[#e0f2fe] text-[#087ebf]">
                   {job.experienceLevel}
                 </span>
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">

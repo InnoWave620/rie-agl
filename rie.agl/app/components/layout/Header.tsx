@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Search, Bell, ChevronDown, Menu, UserPlus, Award, Calendar, BellOff } from 'lucide-react';
+import { Search, Bell, ChevronDown, Menu, UserPlus, Award, Calendar, BellOff, X, Briefcase, FileText, Loader2 } from 'lucide-react';
 import { cn, formatRelativeTime } from '../../lib/utils';
 import { useSidebar } from './SidebarContext';
 
@@ -30,6 +30,59 @@ function getGreeting(hour: number): string {
 /* ─── Component ─────────────────────────────────────── */
 export default function Header({ title, subtitle, user }: HeaderProps) {
   const [currentUser, setCurrentUser] = useState<any>(user);
+
+  // Search Modal States
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchJobs, setSearchJobs] = useState<any[]>([]);
+  const [searchCandidates, setSearchCandidates] = useState<any[]>([]);
+  const [searching, setSearching] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen(prev => !prev);
+      }
+      if (e.key === 'Escape') {
+        setSearchOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  useEffect(() => {
+    if (!searchOpen) return;
+    setSearching(true);
+    Promise.all([
+      fetch('/api/jobs').then(res => res.json()),
+      fetch('/api/applications?limit=100').then(res => res.json())
+    ]).then(([jobsData, appsData]) => {
+      if (jobsData.success) setSearchJobs(jobsData.data || []);
+      if (appsData.success) setSearchCandidates(appsData.data || []);
+    }).catch(err => {
+      console.error("Search data fetch failed:", err);
+    }).finally(() => {
+      setSearching(false);
+    });
+  }, [searchOpen]);
+
+  const filteredJobs = searchQuery
+    ? searchJobs.filter(j => 
+        j.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        j.division.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (j.location && j.location.toLowerCase().includes(searchQuery.toLowerCase()))
+      ).slice(0, 5)
+    : [];
+
+  const filteredCandidates = searchQuery
+    ? searchCandidates.filter(c => 
+        `${c.candidate.firstName} ${c.candidate.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.candidate.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.jobTitle.toLowerCase().includes(searchQuery.toLowerCase())
+      ).slice(0, 5)
+    : [];
 
   useEffect(() => {
     if (user) {
@@ -134,7 +187,7 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
   return (
     <header
       className={cn(
-        'bg-white border-b border-[#E2E6EF]',
+        'bg-[#1b365f] border-b border-white/10 text-white',
         'px-6 h-16 shrink-0',
         'sticky top-0 z-40',
       )}
@@ -146,18 +199,18 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
         <div className="flex items-center gap-2 min-w-0">
           <button
             onClick={toggleMobileSidebar}
-            className="p-2 -ml-2 mr-1 rounded-xl text-[#535E75] hover:bg-[#F4F6F9] hover:text-[#0A0F24] transition-all md:hidden shrink-0"
+            className="p-2 -ml-2 mr-1 rounded-xl text-white/80 hover:bg-white/10 hover:text-white transition-all md:hidden shrink-0"
             aria-label="Toggle Sidebar"
           >
             <Menu size={18} strokeWidth={2} />
           </button>
 
           <div className="min-w-0">
-            <h1 className="font-semibold text-xl text-[#0A0F24] leading-tight tracking-[-0.02em] truncate">
+            <h1 className="font-semibold text-xl text-white leading-tight tracking-[-0.02em] truncate">
               {title}
             </h1>
             {subtitle && (
-              <p className="text-sm text-[#535E75] mt-0.5 leading-tight truncate">
+              <p className="text-sm text-white/70 mt-0.5 leading-tight truncate">
                 {subtitle}
               </p>
             )}
@@ -172,10 +225,11 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
           {/* Search icon button */}
           <button
             id="header-search-btn"
+            onClick={() => setSearchOpen(true)}
             className={cn(
               'flex items-center justify-center w-9 h-9 rounded-xl',
-              'text-[#535E75] bg-transparent',
-              'hover:bg-[#F4F6F9] hover:text-[#0A0F24]',
+              'text-white/80 bg-transparent',
+              'hover:bg-white/10 hover:text-white',
               'transition-all duration-150',
             )}
             aria-label="Search"
@@ -199,8 +253,8 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
               }}
               className={cn(
                 'relative flex items-center justify-center w-9 h-9 rounded-xl',
-                'text-[#535E75] bg-transparent',
-                'hover:bg-[#F4F6F9] hover:text-[#0A0F24]',
+                'text-white/80 bg-transparent',
+                'hover:bg-white/10 hover:text-white',
                 'transition-all duration-150',
               )}
               aria-label="Notifications"
@@ -294,7 +348,7 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
           </div>
 
           {/* Divider */}
-          <div className="w-px h-5 bg-[#E2E6EF] mx-1" />
+          <div className="w-px h-5 bg-white/20 mx-1" />
 
           {/* User avatar + name + chevron */}
           <button
@@ -302,7 +356,7 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
             title={`${greeting}, ${displayUser.firstName} ${displayUser.lastName || ''}`.trim()}
             className={cn(
               'flex items-center gap-2.5 pl-1 pr-2 py-1.5 rounded-xl',
-              'hover:bg-[#F4F6F9]',
+              'hover:bg-white/10',
               'transition-all duration-150 group',
             )}
             aria-label="User menu"
@@ -312,16 +366,16 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
               <img
                 src={displayUser.avatarUrl}
                 alt={`${displayUser.firstName} ${displayUser.lastName}`}
-                className="w-[36px] h-[36px] rounded-full object-cover shrink-0 ring-2 ring-[#001CB0]/20"
+                className="w-[36px] h-[36px] rounded-full object-cover shrink-0 ring-2 ring-white/20"
               />
             ) : (
               <div
                 className={cn(
                   'w-[36px] h-[36px] rounded-full shrink-0',
                   'flex items-center justify-center',
-                  'bg-gradient-to-br from-[#001CB0] to-[#0025E0]',
-                  'text-white text-[13px] font-bold',
-                  'ring-2 ring-[#001CB0]/20',
+                  'bg-gradient-to-br from-[#edc047] to-[#e0b236]',
+                  'text-[#1b365f] text-[13px] font-bold',
+                  'ring-2 ring-white/20',
                 )}
               >
                 {displayUser.avatarInitials}
@@ -330,10 +384,10 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
 
             {/* Name + greeting */}
             <div className="hidden md:flex flex-col items-start min-w-0">
-              <span className="text-[13px] font-semibold text-[#0A0F24] leading-tight truncate max-w-[160px]">
+              <span className="text-[13px] font-semibold text-white leading-tight truncate max-w-[160px]">
                 {greeting}, {displayUser.firstName}
               </span>
-              <span className="text-[11.5px] text-[#535E75] leading-tight truncate max-w-[160px]">
+              <span className="text-[11.5px] text-white/70 leading-tight truncate max-w-[160px]">
                 {displayUser.firstName} {displayUser.lastName || ''}
               </span>
             </div>
@@ -341,11 +395,143 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
             <ChevronDown
               size={14}
               strokeWidth={2.5}
-              className="text-[#8A93AA] group-hover:text-[#535E75] transition-colors"
+              className="text-white/60 group-hover:text-white transition-colors"
             />
           </button>
         </div>
       </div>
+
+      {/* Search Modal Overlay */}
+      {searchOpen && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center pt-[10vh] px-4">
+          <div 
+            className="fixed inset-0 bg-[#0A0F24]/50 backdrop-blur-xs transition-opacity animate-fade-in animate-duration-200"
+            onClick={() => setSearchOpen(false)}
+          />
+          <div className="relative w-full max-w-2xl bg-white rounded-2xl border border-[#E2E6EF] shadow-2xl overflow-hidden flex flex-col max-h-[70vh] transition-all animate-scale-in text-left">
+            
+            {/* Input Bar */}
+            <div className="relative border-b border-[#E2E6EF] bg-[#F8FAFC]">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8A93AA]" size={18} />
+              <input
+                type="text"
+                placeholder="Search jobs, candidates, or type to filter..."
+                className="w-full pl-12 pr-16 py-4 text-base text-[#0A0F24] bg-transparent placeholder:text-[#8A93AA] focus:outline-none"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                autoFocus
+              />
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                {searchQuery && (
+                  <button onClick={() => setSearchQuery('')} className="p-1 hover:bg-[#E2E6EF] rounded-full text-[#535E75] transition-colors">
+                    <X size={14} />
+                  </button>
+                )}
+                <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-bold text-[#8A93AA] bg-white border border-[#E2E6EF] rounded shadow-xs select-none">
+                  ESC
+                </kbd>
+              </div>
+            </div>
+
+            {/* Results Area */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[50vh]">
+              {searching ? (
+                <div className="flex flex-col items-center justify-center py-12 gap-2 text-[#535E75]">
+                  <Loader2 className="animate-spin text-[#1b365f]" size={28} />
+                  <span className="text-xs font-semibold animate-pulse">Fetching search database...</span>
+                </div>
+              ) : searchQuery ? (
+                <>
+                  {/* Matching Jobs */}
+                  {filteredJobs.length > 0 && (
+                    <div>
+                      <h4 className="text-[10px] font-bold uppercase tracking-wider text-[#8A93AA] mb-2 px-2">Matching Positions</h4>
+                      <div className="space-y-1">
+                        {filteredJobs.map(job => (
+                          <Link
+                            key={job.id}
+                            href={`/employer/jobs/${job.id}`}
+                            onClick={() => setSearchOpen(false)}
+                            className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#F4F6F9] transition-colors group"
+                          >
+                            <div className="bg-[#1b365f]/5 text-[#1b365f] p-2 rounded-lg group-hover:bg-[#1b365f]/10 transition-colors">
+                              <Briefcase size={16} />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <span className="text-sm font-bold text-[#0A0F24] block leading-tight">{job.title}</span>
+                              <span className="text-xs text-[#535E75] block mt-0.5 leading-none">{job.division} · {job.location || 'Remote'}</span>
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Matching Candidates */}
+                  {filteredCandidates.length > 0 && (
+                    <div>
+                      <h4 className="text-[10px] font-bold uppercase tracking-wider text-[#8A93AA] mb-2 px-2">Matching Candidates</h4>
+                      <div className="space-y-1">
+                        {filteredCandidates.map(c => (
+                          <Link
+                            key={c.id}
+                            href={`/employer/candidates/${c.candidateId}?appId=${c.id}`}
+                            onClick={() => setSearchOpen(false)}
+                            className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-[#F4F6F9] transition-colors group"
+                          >
+                            <div className="w-8 h-8 rounded-full bg-[#edc047]/10 text-[#1b365f] border border-[#edc047]/30 flex items-center justify-center font-bold text-xs">
+                              {c.candidate.firstName[0]}{c.candidate.lastName[0]}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <span className="text-sm font-bold text-[#0A0F24] block leading-tight">{c.candidate.firstName} {c.candidate.lastName}</span>
+                              <span className="text-xs text-[#535E75] block mt-0.5 leading-none">{c.candidate.email} · Applied for {c.jobTitle}</span>
+                            </div>
+                            {c.atsScore != null && (
+                              <span className="bg-green-50 text-green-700 border border-green-200 text-xs font-bold px-2 py-0.5 rounded-full">
+                                {Number(c.atsScore).toFixed(0)}%
+                              </span>
+                            )}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {filteredJobs.length === 0 && filteredCandidates.length === 0 && (
+                    <div className="text-center py-10">
+                      <p className="text-sm text-[#8A93AA]">No results found matching &ldquo;{searchQuery}&rdquo;</p>
+                      <p className="text-xs text-[#8A93AA] mt-1">Try searching for a different position, candidate name, or division.</p>
+                    </div>
+                  )}
+                </>
+              ) : (
+                /* Quick Navigation / Actions */
+                <div>
+                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-[#8A93AA] mb-2 px-2">Quick Navigation</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { label: 'Create New Job', path: '/employer/jobs/new', icon: Briefcase },
+                      { label: 'Candidate Pipeline', path: '/employer/candidates', icon: UserPlus },
+                      { label: 'View Analytics', path: '/employer/analytics', icon: Award },
+                      { label: 'Account Settings', path: '/employer/settings', icon: Calendar },
+                    ].map(act => (
+                      <Link
+                        key={act.label}
+                        href={act.path}
+                        onClick={() => setSearchOpen(false)}
+                        className="flex items-center gap-3 p-3 rounded-xl border border-[#E2E6EF] hover:border-[#1b365f] hover:bg-[#1b365f]/5 hover:text-[#1b365f] transition-all group text-sm font-semibold text-[#0A0F24]"
+                      >
+                        <act.icon className="text-[#8A93AA] group-hover:text-[#1b365f] transition-colors" size={16} />
+                        {act.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

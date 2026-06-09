@@ -12,18 +12,18 @@
   --font-sans: 'Inter', system-ui, sans-serif;
 
   /* AGL Primary Brand */
-  --color-navy: #1C355E;
+  --color-navy: #1b365f;
   --color-navy-light: #2A4A7F;
   --color-navy-dark: #142440;
   --color-navy-50: #EEF2F9;
   --color-navy-100: #D5DFF0;
   --color-navy-200: #AAC0E0;
 
-  --color-orange: #F58220;
-  --color-orange-light: #F7A050;
-  --color-orange-dark: #D96E10;
-  --color-orange-50: #FEF3E7;
-  --color-orange-100: #FDDCB5;
+  --color-orange: #edc047;
+  --color-orange-light: #f4d173;
+  --color-orange-dark: #e0b236;
+  --color-orange-50: #fffdf2;
+  --color-orange-100: #fef0cd;
 
   /* Semantic Status */
   --color-success: #22C55E;
@@ -90,10 +90,10 @@ body {
 }
 
 /* ─── Gradients ─────────────────────────────────── */
-.gradient-navy { background: linear-gradient(135deg, #1C355E 0%, #2A4A7F 100%); }
-.gradient-orange { background: linear-gradient(135deg, #F58220 0%, #F7A050 100%); }
-.gradient-hero { background: linear-gradient(135deg, #142440 0%, #1C355E 50%, #2A4A7F 100%); }
-.gradient-card-navy { background: linear-gradient(135deg, #1C355E 0%, #2d4e82 100%); }
+.gradient-navy { background: linear-gradient(135deg, #1b365f 0%, #2A4A7F 100%); }
+.gradient-orange { background: linear-gradient(135deg, #edc047 0%, #f4d173 100%); }
+.gradient-hero { background: linear-gradient(135deg, #142440 0%, #1b365f 50%, #2A4A7F 100%); }
+.gradient-card-navy { background: linear-gradient(135deg, #1b365f 0%, #2d4e82 100%); }
 
 /* ─── Cards ─────────────────────────────────────── */
 .card {
@@ -134,26 +134,27 @@ body {
 .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
 
 .btn-primary {
-  background: linear-gradient(135deg, #F58220 0%, #F7A050 100%);
-  color: white;
-  box-shadow: 0 8px 20px -6px rgba(245, 130, 32, 0.4);
+  background: #edc047;
+  color: #1b365f;
+  box-shadow: 0 8px 20px -6px rgba(237, 192, 71, 0.4);
 }
 .btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 15px 30px -8px rgba(245, 130, 32, 0.55);
+  background: #e0b236;
+  box-shadow: 0 15px 30px -8px rgba(237, 192, 71, 0.55);
 }
 .btn-primary:active:not(:disabled) {
   transform: translateY(0);
 }
 
 .btn-navy {
-  background: linear-gradient(135deg, #1C355E 0%, #2A4A7F 100%);
+  background: linear-gradient(135deg, #1b365f 0%, #2A4A7F 100%);
   color: white;
-  box-shadow: 0 8px 20px -6px rgba(28, 53, 94, 0.3);
+  box-shadow: 0 8px 20px -6px rgba(27, 54, 95, 0.3);
 }
 .btn-navy:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 15px 30px -8px rgba(28, 53, 94, 0.45);
+  box-shadow: 0 15px 30px -8px rgba(27, 54, 95, 0.45);
 }
 
 .btn-outline { background: white; color: #1C355E; border: 1.5px solid #1C355E; }
@@ -230,7 +231,7 @@ body {
 /* Division Badges */
 .badge-port      { background: #DBEAFE; color: #1D4ED8; }
 .badge-rail      { background: #EDE9FE; color: #6D28D9; }
-.badge-logistics { background: #D1FAE5; color: #065F46; }
+.badge-logistics { background: #e0f2fe; color: #087ebf; }
 
 /* Status Badges */
 .badge-published { background: #DCFCE7; color: #15803D; }

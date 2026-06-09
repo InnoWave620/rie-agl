@@ -59,7 +59,7 @@ export default function CareersPage() {
     <div className="min-h-screen bg-[#F4F6F9]">
 
       {/* ── Sticky Dark Navbar ── */}
-      <nav className="sticky top-0 z-50 bg-[#0A0F24] border-b border-white/5 backdrop-blur-md">
+      <nav className="sticky top-0 z-50 bg-[#1b365f] border-b border-white/10 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <Link href="/careers" className="flex items-center gap-3.5 group">
             <img
@@ -297,7 +297,7 @@ export default function CareersPage() {
       </div>
 
       {/* ── Footer ── */}
-      <footer className="mt-24 bg-[#0A0F24] border-t border-white/5">
+      <footer className="mt-24 bg-[#1b365f] border-t border-white/10">
         <div className="max-w-7xl mx-auto px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <img
