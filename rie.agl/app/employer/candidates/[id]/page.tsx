@@ -26,6 +26,7 @@ interface CandidateApp {
   aiSummary?: string;
   strengths?: string;
   weaknesses?: string;
+  notes?: string;
   createdAt: string;
 }
 
@@ -55,6 +56,7 @@ export default function CandidateProfilePage({ params }: Props) {
   const [inviteMessage, setInviteMessage] = useState('');
   const [invited, setInvited] = useState(false);
   const [notes, setNotes] = useState('');
+  const [savingNotes, setSavingNotes] = useState(false);
 
   const application = candidate
     ? (appId ? candidate.applications.find(a => a.id === appId) ?? candidate.applications[0] : candidate.applications[0])
@@ -74,8 +76,47 @@ export default function CandidateProfilePage({ params }: Props) {
   useEffect(() => {
     if (application) {
       setInvited(application.status === 'interview_invited');
+      setNotes(application.notes ?? '');
     }
   }, [application]);
+
+  async function handleSaveNotes() {
+    if (!application || !candidate) return;
+    setSavingNotes(true);
+    try {
+      const res = await fetch(`/api/candidates/${candidate.id}/notes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          applicationId: application.id,
+          notes: notes,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setCandidate(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            applications: prev.applications.map(a => {
+              if (a.id === application.id) {
+                return { ...a, notes: notes };
+              }
+              return a;
+            }),
+          };
+        });
+        alert('Notes saved successfully!');
+      } else {
+        alert('Failed to save notes: ' + data.error);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred while saving notes.');
+    } finally {
+      setSavingNotes(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -440,8 +481,19 @@ export default function CandidateProfilePage({ params }: Props) {
                   onChange={e => setNotes(e.target.value)}
                 />
                 <div className="flex justify-end mt-4">
-                  <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-[#0A0F24] hover:bg-[#001CB0] transition-all shadow-sm">
-                    Save Notes
+                  <button
+                    onClick={handleSaveNotes}
+                    disabled={savingNotes}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-[#1b365f] bg-[#edc047] hover:bg-[#e0b236] transition-all shadow-sm disabled:opacity-50"
+                  >
+                    {savingNotes ? (
+                      <>
+                        <Loader2 size={14} className="animate-spin" />
+                        Saving…
+                      </>
+                    ) : (
+                      'Save Notes'
+                    )}
                   </button>
                 </div>
               </div>

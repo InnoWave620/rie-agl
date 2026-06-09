@@ -19,13 +19,14 @@ export async function GET(_req: NextRequest, { params }: Params) {
       AppCreatedDate: Date | string | null; FinalScore: number | string | null;
       Recommendation: string | null; AISummary: string | null;
       Strengths: string | null; Weaknesses: string | null; JobTitle: string | null;
+      Notes: string | null;
     }
 
     const rows = await query<DBRow>(`
       SELECT
         ap.ApplicantID, ap.FullName, ap.Email, ap.Phone, ap.Location,
         ap.CreatedDate AS ApplicantCreatedDate,
-        a.ApplicationID, a.JobID, a.ApplicationStatus,
+        a.ApplicationID, a.JobID, a.ApplicationStatus, a.Notes,
         a.CreatedDate  AS AppCreatedDate,
         ats.FinalScore, ats.Recommendation,
         ai.AISummary, ai.Strengths, ai.Weaknesses,
@@ -68,6 +69,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
             aiSummary:     r.AISummary ?? undefined,
             strengths:     r.Strengths ?? undefined,
             weaknesses:    r.Weaknesses ?? undefined,
+            notes:         r.Notes ?? undefined,
             consentGiven:  true,
             resumeFileName: 'resume.pdf',
             createdAt:     r.AppCreatedDate ? new Date(r.AppCreatedDate).toISOString() : '',
