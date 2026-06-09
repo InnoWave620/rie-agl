@@ -102,8 +102,7 @@ export default function CareersPage() {
         </video>
  
         {/* Premium blend overlays */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0A0F24]/90 via-[#001CB0]/80 to-[#0025E0]/75 mix-blend-multiply" />
-        <div className="absolute inset-0 bg-[#0A0F24]/40" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/60" />
  
         {/* Dot grid pattern */}
         <div
