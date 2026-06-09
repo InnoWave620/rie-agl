@@ -98,7 +98,7 @@ export default function CareersPage() {
           playsInline
           className="absolute inset-0 w-full h-full object-cover pointer-events-none"
         >
-          <source src="/logistics2.mp4" type="video/mp4" />
+          <source src="/agl-vide-msc.mp4" type="video/mp4" />
         </video>
  
         {/* Premium blend overlays */}
