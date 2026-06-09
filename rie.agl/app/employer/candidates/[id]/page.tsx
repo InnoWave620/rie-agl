@@ -9,7 +9,7 @@ import { formatRelativeTime } from '../../../lib/utils';
 import {
   ArrowLeft, Download, Mail, Phone, MapPin,
   ThumbsUp, ThumbsDown, RefreshCw, Send, Calendar,
-  CheckCircle, X, Loader2, Sparkles, FileText, StickyNote, User, BrainCircuit,
+  CheckCircle, X, Loader2, Sparkles, FileText, StickyNote, User, BrainCircuit, AlertCircle,
 } from 'lucide-react';
 import type { ApplicationStatus, DecisionCategory, Division } from '../../../types';
 
@@ -57,6 +57,12 @@ export default function CandidateProfilePage({ params }: Props) {
   const [invited, setInvited] = useState(false);
   const [notes, setNotes] = useState('');
   const [savingNotes, setSavingNotes] = useState(false);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const showNotification = (type: 'success' | 'error', message: string) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   const application = candidate
     ? (appId ? candidate.applications.find(a => a.id === appId) ?? candidate.applications[0] : candidate.applications[0])
@@ -106,13 +112,13 @@ export default function CandidateProfilePage({ params }: Props) {
             }),
           };
         });
-        alert('Notes saved successfully!');
+        showNotification('success', 'Notes saved successfully!');
       } else {
-        alert('Failed to save notes: ' + data.error);
+        showNotification('error', 'Failed to save notes: ' + data.error);
       }
     } catch (err) {
       console.error(err);
-      alert('An error occurred while saving notes.');
+      showNotification('error', 'An error occurred while saving notes.');
     } finally {
       setSavingNotes(false);
     }
@@ -579,6 +585,26 @@ export default function CandidateProfilePage({ params }: Props) {
           </div>
         </div>
       )}
+
+      {/* Floating Toast Notification */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-xl border border-[#E2E6EF] bg-white shadow-2xl animate-[fadeSlideUp_0.3s_ease_both]">
+          {toast.type === 'success' ? (
+            <CheckCircle size={18} className="text-green-600 shrink-0 animate-bounce" />
+          ) : (
+            <AlertCircle size={18} className="text-red-600 shrink-0" />
+          )}
+          <span className="text-xs font-bold text-gray-800">{toast.message}</span>
+        </div>
+      )}
+
+      {/* Keyframe animation support */}
+      <style>{`
+        @keyframes fadeSlideUp {
+          from { opacity: 0; transform: translateY(18px); }
+          to   { opacity: 1; transform: translateY(0);    }
+        }
+      `}</style>
     </>
   );
 }
