@@ -51,7 +51,7 @@ const STRENGTH_TEXT   = ['', 'text-red-500', 'text-amber-500', 'text-emerald-500
 const INPUT_CLS =
   'w-full h-13 rounded-xl border border-gray-200 bg-[#F4F6F9] text-base text-[#0A0F24] ' +
   'placeholder-gray-400 outline-none transition ' +
-  'focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/15 hover:border-gray-300';
+  'focus:border-[#1b365f] focus:ring-2 focus:ring-[#1b365f]/15 hover:border-gray-300';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -121,7 +121,7 @@ export default function SignupPage() {
     <div className="min-h-screen flex bg-white">
 
       {/* ══════════════════ LEFT PANEL ══════════════════ */}
-      <div className="hidden lg:flex flex-col justify-between w-1/2 relative overflow-hidden bg-gradient-to-br from-[#0A0F24] to-[#001CB0] px-20 py-16">
+      <div className="hidden lg:flex flex-col justify-between w-1/2 relative overflow-hidden bg-gradient-to-br from-[#0A0F24] to-[#1b365f] px-20 py-16">
 
         {/* Dot-grid overlay */}
         <div
@@ -134,7 +134,7 @@ export default function SignupPage() {
         />
 
         {/* Blur orbs */}
-        <div className="pointer-events-none absolute -top-24 -right-24 w-80 h-80 rounded-full bg-[#001CB0]/60 blur-3xl" />
+        <div className="pointer-events-none absolute -top-24 -right-24 w-80 h-80 rounded-full bg-[#1b365f]/60 blur-3xl" />
         <div className="pointer-events-none absolute bottom-20 -left-16 w-64 h-64 rounded-full bg-[#E66423]/20 blur-3xl" />
 
         {/* ── Logo ── */}
@@ -189,7 +189,7 @@ export default function SignupPage() {
         <div className="w-full max-w-md my-8">
 
           {/* Card */}
-          <div className="bg-white rounded-3xl shadow-xl shadow-[#001CB0]/8 p-10 transition-all duration-500 animate-[fadeSlideUp_0.45s_ease_both]">
+          <div className="bg-white rounded-3xl shadow-xl shadow-[#1b365f]/8 p-10 transition-all duration-500 animate-[fadeSlideUp_0.45s_ease_both]">
 
             {/* Mobile logo */}
             <div className="flex items-center gap-3.5 mb-6 lg:hidden">
@@ -216,7 +216,7 @@ export default function SignupPage() {
                   {[0, 1, 2].map(i => (
                     <div
                       key={i}
-                      className="w-2 h-2 rounded-full bg-[#001CB0] animate-bounce"
+                      className="w-2 h-2 rounded-full bg-[#1b365f] animate-bounce"
                       style={{ animationDelay: `${i * 0.15}s` }}
                     />
                   ))}
@@ -325,7 +325,7 @@ export default function SignupPage() {
                       <button
                         type="button"
                         onClick={() => setShowPw(v => !v)}
-                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#001CB0] transition-colors"
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#1b365f] transition-colors"
                         aria-label={showPw ? 'Hide password' : 'Show password'}
                       >
                         {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -371,7 +371,7 @@ export default function SignupPage() {
                       <button
                         type="button"
                         onClick={() => setShowCpw(v => !v)}
-                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#001CB0] transition-colors"
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#1b365f] transition-colors"
                         aria-label={showCpw ? 'Hide confirm password' : 'Show confirm password'}
                       >
                         {showCpw ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -396,7 +396,7 @@ export default function SignupPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full h-[52px] rounded-xl bg-gradient-to-r from-[#001CB0] to-[#0033E0] text-white font-bold text-sm tracking-wide shadow-lg shadow-[#001CB0]/30 transition-all duration-200 hover:shadow-xl hover:shadow-[#001CB0]/40 hover:brightness-110 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full h-[52px] rounded-xl bg-[#edc047] text-[#1b365f] font-bold text-sm tracking-wide shadow-lg shadow-[#edc047]/20 transition-all duration-200 hover:bg-[#e0b236] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {loading ? (
                       <>
