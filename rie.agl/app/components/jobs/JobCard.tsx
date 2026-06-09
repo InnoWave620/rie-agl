@@ -19,7 +19,7 @@ export default function JobCard({ job, variant = 'public' }: JobCardProps) {
       {/* Header */}
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex gap-2 flex-wrap">
-          <DivisionBadge division={job.division} />
+          <DivisionBadge division={job.division} variant={variant} />
           <span
             className="badge font-bold"
             style={{ background: '#e0f2fe', color: '#087ebf' }}

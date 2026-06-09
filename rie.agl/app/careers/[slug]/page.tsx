@@ -123,7 +123,7 @@ export default async function JobDetailPage({ params }: Props) {
             {/* Header card */}
             <div className="card p-8">
               <div className="flex flex-wrap gap-2 mb-5">
-                <DivisionBadge division={job.division} />
+                <DivisionBadge division={job.division} variant="public" />
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[#e0f2fe] text-[#087ebf]">
                   {job.experienceLevel}
                 </span>

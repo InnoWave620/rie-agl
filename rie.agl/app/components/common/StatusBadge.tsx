@@ -51,11 +51,16 @@ export function JobStatusBadge({ status }: JobStatusBadgeProps) {
 
 interface DivisionBadgeProps {
   division: Division;
+  variant?: 'public' | 'employer';
 }
 
-export function DivisionBadge({ division }: DivisionBadgeProps) {
+export function DivisionBadge({ division, variant = 'employer' }: DivisionBadgeProps) {
+  const isPublic = variant === 'public';
   return (
-    <span className={`${getDivisionClass(division)} inline-flex items-center gap-1 w-fit`}>
+    <span
+      className={isPublic ? 'badge font-bold inline-flex items-center gap-1 w-fit' : `${getDivisionClass(division)} inline-flex items-center gap-1 w-fit`}
+      style={isPublic ? { background: '#e0f2fe', color: '#087ebf' } : undefined}
+    >
       {division === 'Port' && <Anchor size={13} />}
       {division === 'Rail' && <Train size={13} />}
       {division === 'Logistics' && <Package size={13} />}
