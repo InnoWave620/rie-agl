@@ -18,9 +18,10 @@ export async function GET(req: NextRequest) {
   const jobId = searchParams.get('jobId');
 
   try {
-    const where = jobId ? `WHERE a.JobID = ${parseInt(jobId)}` : '';
+    const where = jobId ? 'WHERE a.JobID = ?' : '';
+    const params = jobId ? [parseInt(jobId)] : [];
 
-    const rows = await query<DBApp>(`
+    const rows = await execute<DBApp>(`
       SELECT TOP ${Math.min(limit, 100)}
         a.ApplicationID, a.ApplicantID, a.JobID, a.ApplicationStatus, a.CreatedDate,
         ap.FullName, ap.Email, ap.Phone,
@@ -32,7 +33,7 @@ export async function GET(req: NextRequest) {
       LEFT JOIN Jobs j         ON j.JobID           = a.JobID
       ${where}
       ORDER BY a.CreatedDate DESC
-    `);
+    `, params);
 
     const data = rows.map(r => {
       const nameParts = (r.FullName ?? '').split(' ');

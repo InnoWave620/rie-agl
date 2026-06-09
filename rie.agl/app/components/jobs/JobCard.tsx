@@ -2,14 +2,15 @@ import Link from 'next/link';
 import type { Job } from '../../types';
 import { DivisionBadge, JobStatusBadge } from '../common/StatusBadge';
 import { formatDate, formatRelativeTime, formatEmploymentType, pluralize } from '../../lib/utils';
-import { MapPin, Clock, Users, ArrowRight, Briefcase } from 'lucide-react';
+import { MapPin, Clock, Users, ArrowRight, Briefcase, Trash2 } from 'lucide-react';
 
 interface JobCardProps {
   job: Job;
   variant?: 'public' | 'employer';
+  onDelete?: (jobId: string) => void;
 }
 
-export default function JobCard({ job, variant = 'public' }: JobCardProps) {
+export default function JobCard({ job, variant = 'public', onDelete }: JobCardProps) {
   const href = variant === 'public'
     ? `/careers/${job.slug}`
     : `/employer/jobs/${job.id}`;
@@ -75,17 +76,32 @@ export default function JobCard({ job, variant = 'public' }: JobCardProps) {
             <span>{job.region}</span>
           </div>
         )}
-        <Link
-          href={href}
-          className="btn btn-sm font-bold"
-          style={{
-            background: '#edc047',
-            color: '#1b365f',
-          }}
-        >
-          {variant === 'public' ? 'View & Apply' : 'Manage'}
-          <ArrowRight size={14} />
-        </Link>
+        <div className="flex items-center gap-2">
+          {variant === 'employer' && onDelete && (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onDelete(job.id);
+              }}
+              className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all"
+              title="Delete Job"
+            >
+              <Trash2 size={15} />
+            </button>
+          )}
+          <Link
+            href={href}
+            className="btn btn-sm font-bold"
+            style={{
+              background: '#edc047',
+              color: '#1b365f',
+            }}
+          >
+            {variant === 'public' ? 'View & Apply' : 'Manage'}
+            <ArrowRight size={14} />
+          </Link>
+        </div>
       </div>
     </div>
   );

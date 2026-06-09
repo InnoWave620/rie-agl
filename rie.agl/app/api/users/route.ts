@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query, esc } from '../../lib/db';
+import { query, execute } from '../../lib/db';
 import { verifyToken, COOKIE_NAME, createToken, cookieOptions } from '../../lib/auth';
 import bcrypt from 'bcryptjs';
 import type { AuthSession } from '../../types';
@@ -85,24 +85,33 @@ export async function PUT(req: NextRequest) {
 
     let queryStr = `
       UPDATE Users
-      SET FullName = ${esc(fullName)},
-          Email = ${esc(email.trim().toLowerCase())},
-          RoleName = ${esc(dbRole)},
-          Department = ${esc(dept)},
-          AvatarUrl = ${avatarUrl ? esc(avatarUrl) : 'NULL'}
+      SET FullName = ?,
+          Email = ?,
+          RoleName = ?,
+          Department = ?,
+          AvatarUrl = ?
     `;
+    const params: unknown[] = [
+      fullName,
+      email.trim().toLowerCase(),
+      dbRole,
+      dept,
+      avatarUrl || null
+    ];
 
     if (password && password.trim().length > 0) {
       if (password.length < 8) {
         return NextResponse.json({ success: false, error: 'Password must be at least 8 characters long' }, { status: 400 });
       }
       const hashedPassword = await bcrypt.hash(password, 10);
-      queryStr += `, PasswordHash = ${esc(hashedPassword)}`;
+      queryStr += `, PasswordHash = ?`;
+      params.push(hashedPassword);
     }
 
-    queryStr += ` WHERE UserID = ${targetUserId}`;
+    queryStr += ` WHERE UserID = ?`;
+    params.push(targetUserId);
 
-    await query(queryStr);
+    await execute(queryStr, params);
 
     if (isSelf) {
       const nameParts = fullName.trim().split(/\s+/);
@@ -168,9 +177,9 @@ export async function POST(req: NextRequest) {
     const emailLower = email.trim().toLowerCase();
 
     // Check if email already exists
-    const existing = await query<{ UserID: number }>(`
-      SELECT UserID FROM Users WHERE Email = ${esc(emailLower)}
-    `);
+    const existing = await execute<{ UserID: number }>(`
+      SELECT UserID FROM Users WHERE Email = ?
+    `, [emailLower]);
 
     if (existing.length > 0) {
       return NextResponse.json(
@@ -188,19 +197,11 @@ export async function POST(req: NextRequest) {
     const dept = (division ?? 'Human Resources').trim();
 
     // Insert user
-    const rows = await query<{ UserID: number }>(`
+    const rows = await execute<{ UserID: number }>(`
       INSERT INTO Users (FullName, Email, RoleName, Department, PasswordHash, IsActive, CreatedDate)
       OUTPUT INSERTED.UserID
-      VALUES (
-        ${esc(fullName.trim())},
-        ${esc(emailLower)},
-        ${esc(roleName)},
-        ${esc(dept)},
-        ${esc(passwordHash)},
-        1,
-        GETDATE()
-      )
-    `);
+      VALUES (?, ?, ?, ?, ?, 1, GETDATE())
+    `, [fullName.trim(), emailLower, roleName, dept, passwordHash]);
 
     const newUserId = rows[0]?.UserID;
     if (!newUserId) {
@@ -220,6 +221,73 @@ export async function POST(req: NextRequest) {
     }, { status: 201 });
   } catch (error) {
     console.error('[POST /api/users]', error);
+    return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
+  }
+}
+
+// DELETE /api/users — Delete a team member (admin/hr_manager action)
+export async function DELETE(req: NextRequest) {
+  try {
+    const token = req.cookies.get(COOKIE_NAME)?.value;
+    if (!token) {
+      return NextResponse.json({ success: false, error: 'Not authenticated' }, { status: 401 });
+    }
+
+    let session;
+    try {
+      session = await verifyToken(token);
+    } catch {
+      return NextResponse.json({ success: false, error: 'Invalid session' }, { status: 401 });
+    }
+
+    if (session.role !== 'admin' && session.role !== 'hr_manager') {
+      return NextResponse.json({ success: false, error: 'Not authorized to delete team members' }, { status: 403 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const targetUserId = Number(searchParams.get('id'));
+
+    if (isNaN(targetUserId)) {
+      return NextResponse.json({ success: false, error: 'Invalid user ID' }, { status: 400 });
+    }
+
+    if (targetUserId === Number(session.userId)) {
+      return NextResponse.json({ success: false, error: 'You cannot delete your own account' }, { status: 400 });
+    }
+
+    // Retrieve target user role
+    const targetUser = await execute<{ RoleName: string }>(`
+      SELECT RoleName FROM Users WHERE UserID = ?
+    `, [targetUserId]);
+
+    if (targetUser.length === 0) {
+      return NextResponse.json({ success: false, error: 'User not found' }, { status: 404 });
+    }
+
+    // HR Managers cannot delete Admin users
+    if (targetUser[0].RoleName === 'Admin' && session.role !== 'admin') {
+      return NextResponse.json({ success: false, error: 'Only admins can delete admin accounts' }, { status: 403 });
+    }
+
+    // Reassign reference constraints
+    // 1. Set UserID to NULL in AuditLogs
+    await execute(`
+      UPDATE AuditLogs SET UserID = NULL WHERE UserID = ?
+    `, [targetUserId]);
+
+    // 2. Reassign Jobs created by targetUserId to the current user (caller)
+    await execute(`
+      UPDATE Jobs SET CreatedBy = ? WHERE CreatedBy = ?
+    `, [Number(session.userId), targetUserId]);
+
+    // 3. Delete user row from Users
+    await execute(`
+      DELETE FROM Users WHERE UserID = ?
+    `, [targetUserId]);
+
+    return NextResponse.json({ success: true, message: 'Team member deleted successfully' });
+  } catch (error) {
+    console.error('[DELETE /api/users]', error);
     return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
   }
 }

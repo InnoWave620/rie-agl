@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Header from '../../components/layout/Header';
-import { Shield, Users, Bell, Database, Key, Plus, Edit2, Loader2, CheckCircle, Save, User, Camera, Upload, AlertCircle, ChevronDown, X } from 'lucide-react';
+import { Shield, Users, Bell, Database, Key, Plus, Edit2, Trash2, Loader2, CheckCircle, Save, User, Camera, Upload, AlertCircle, ChevronDown, X } from 'lucide-react';
 
 const SETTING_TABS = [
   { key: 'profile',       label: 'My Profile',           icon: User },
@@ -73,6 +73,13 @@ export default function SettingsPage() {
   const [editError, setEditError] = useState<string | null>(null);
   const [editSuccess, setEditSuccess] = useState<string | null>(null);
 
+  // Delete Modal States
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingUser, setDeletingUser] = useState<DBUser | null>(null);
+  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleteSuccess, setDeleteSuccess] = useState<string | null>(null);
+
   useEffect(() => {
     fetch('/api/auth')
       .then(r => r.json())
@@ -99,7 +106,7 @@ export default function SettingsPage() {
 
   const roleBadgeStyle = (role: string) => {
     if (role === 'admin')      return 'bg-[#E66423]/15 text-[#E66423]';
-    if (role === 'hr_manager') return 'bg-[#001CB0]/10 text-[#001CB0]';
+    if (role === 'hr_manager') return 'bg-[#1b365f]/10 text-[#1b365f]';
     return 'bg-gray-100 text-gray-500';
   };
 
@@ -270,6 +277,57 @@ export default function SettingsPage() {
     }
   };
 
+  const canDelete = (targetUser: DBUser) => {
+    if (!session) return false;
+    const callerId = String(session.userId);
+    const callerRole = session.role;
+
+    // Cannot delete oneself
+    if (String(targetUser.id) === callerId) return false;
+
+    // Caller must be admin or hr_manager
+    if (callerRole !== 'admin' && callerRole !== 'hr_manager') return false;
+
+    // HR Managers cannot delete admin accounts
+    if (callerRole === 'hr_manager' && targetUser.role === 'admin') return false;
+
+    return true;
+  };
+
+  const handleDeleteSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!deletingUser) return;
+
+    setDeleteSubmitting(true);
+    setDeleteError(null);
+    setDeleteSuccess(null);
+
+    try {
+      const res = await fetch(`/api/users?id=${deletingUser.id}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (data.success) {
+        setDeleteSuccess('Team member deleted successfully!');
+        // Refresh the user list
+        fetch('/api/users')
+          .then(r => r.json())
+          .then(d => { if (d.success) setUsers(d.data ?? []); });
+
+        setTimeout(() => {
+          setShowDeleteModal(false);
+          setDeletingUser(null);
+        }, 1500);
+      } else {
+        setDeleteError(data.error ?? 'Failed to delete team member.');
+      }
+    } catch {
+      setDeleteError('Network error deleting team member.');
+    } finally {
+      setDeleteSubmitting(false);
+    }
+  };
+
   return (
     <>
       <Header title="Settings" subtitle="Platform configuration and user profile settings" />
@@ -288,8 +346,8 @@ export default function SettingsPage() {
                     onClick={() => setActiveTab(tab.key)}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all text-left ${
                       activeTab === tab.key
-                        ? 'bg-[#001CB0] text-white shadow-md shadow-[#001CB0]/20'
-                        : 'text-gray-500 hover:text-[#001CB0] hover:bg-[#001CB0]/5'
+                        ? 'bg-[#1b365f] text-white shadow-md shadow-[#1b365f]/20'
+                        : 'text-gray-500 hover:text-[#1b365f] hover:bg-[#1b365f]/5'
                     }`}
                   >
                     <tab.icon size={16} />
@@ -332,10 +390,10 @@ export default function SettingsPage() {
                       <img
                         src={profileAvatarUrl}
                         alt="Profile avatar"
-                        className="w-24 h-24 rounded-full object-cover ring-4 ring-[#001CB0]/10"
+                        className="w-24 h-24 rounded-full object-cover ring-4 ring-[#1b365f]/10"
                       />
                     ) : (
-                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#001CB0] to-[#0025E0] flex items-center justify-center text-white text-3xl font-black ring-4 ring-[#001CB0]/10">
+                      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#1b365f] to-[#1b365f] flex items-center justify-center text-white text-3xl font-black ring-4 ring-[#1b365f]/10">
                         {session?.avatarInitials ?? 'U'}
                       </div>
                     )}
@@ -354,7 +412,7 @@ export default function SettingsPage() {
                     <div className="text-sm font-bold text-[#0A0F24]">Profile Picture</div>
                     <div className="text-xs text-gray-400 font-medium">Upload a square image (PNG or JPG) up to 2MB.</div>
                     <div className="flex items-center gap-3 mt-1 justify-center sm:justify-start">
-                      <label className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-[#001CB0] bg-[#001CB0]/10 hover:bg-[#001CB0]/20 cursor-pointer transition-all">
+                      <label className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-[#1b365f] bg-[#1b365f]/10 hover:bg-[#1b365f]/20 cursor-pointer transition-all">
                         {uploading ? (
                           <>
                             <Loader2 size={12} className="animate-spin animate-infinite" />
@@ -396,7 +454,7 @@ export default function SettingsPage() {
                     <input
                       id="firstName"
                       type="text"
-                      className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                      className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#1b365f] focus:ring-2 focus:ring-[#1b365f]/10 transition-all"
                       value={profileFirstName}
                       onChange={e => setProfileFirstName(e.target.value)}
                       required
@@ -409,7 +467,7 @@ export default function SettingsPage() {
                     <input
                       id="lastName"
                       type="text"
-                      className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                      className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#1b365f] focus:ring-2 focus:ring-[#1b365f]/10 transition-all"
                       value={profileLastName}
                       onChange={e => setProfileLastName(e.target.value)}
                     />
@@ -424,7 +482,7 @@ export default function SettingsPage() {
                     <input
                       id="email"
                       type="email"
-                      className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                      className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#1b365f] focus:ring-2 focus:ring-[#1b365f]/10 transition-all"
                       value={profileEmail}
                       onChange={e => setProfileEmail(e.target.value)}
                       required
@@ -437,7 +495,7 @@ export default function SettingsPage() {
                     <div className="relative">
                       <select
                         id="role"
-                        className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all appearance-none cursor-pointer"
+                        className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#1b365f] focus:ring-2 focus:ring-[#1b365f]/10 transition-all appearance-none cursor-pointer"
                         value={profileRole}
                         onChange={e => setProfileRole(e.target.value)}
                       >
@@ -458,7 +516,7 @@ export default function SettingsPage() {
                   <input
                     id="avatarUrl"
                     type="text"
-                    className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                    className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#1b365f] focus:ring-2 focus:ring-[#1b365f]/10 transition-all"
                     placeholder="https://example.com/avatar.jpg"
                     value={profileAvatarUrl}
                     onChange={e => setProfileAvatarUrl(e.target.value)}
@@ -480,7 +538,7 @@ export default function SettingsPage() {
                       <input
                         id="newPassword"
                         type="password"
-                        className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                        className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#1b365f] focus:ring-2 focus:ring-[#1b365f]/10 transition-all"
                         placeholder="••••••••"
                         value={profilePassword}
                         onChange={e => setProfilePassword(e.target.value)}
@@ -493,7 +551,7 @@ export default function SettingsPage() {
                       <input
                         id="confirmPassword"
                         type="password"
-                        className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                        className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#1b365f] focus:ring-2 focus:ring-[#1b365f]/10 transition-all"
                         placeholder="••••••••"
                         value={profileConfirmPassword}
                         onChange={e => setProfileConfirmPassword(e.target.value)}
@@ -505,7 +563,7 @@ export default function SettingsPage() {
                 <div className="pt-4 flex justify-end">
                   <button
                     type="submit"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white bg-[#001CB0] hover:bg-[#0020CC] shadow-md shadow-[#001CB0]/20 hover:shadow-[#001CB0]/30 transition-all disabled:opacity-50"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white bg-[#1b365f] hover:bg-[#1b365f] shadow-md shadow-[#1b365f]/20 hover:shadow-[#1b365f]/30 transition-all disabled:opacity-50"
                     disabled={saving}
                   >
                     {saving ? (
@@ -543,7 +601,7 @@ export default function SettingsPage() {
                       setInviteSuccess(null);
                       setShowInviteModal(true);
                     }}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-[#001CB0] hover:bg-[#0020CC] shadow-sm shadow-[#001CB0]/20 transition-all"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-[#1b365f] hover:bg-[#1b365f] shadow-sm shadow-[#1b365f]/20 transition-all"
                   >
                     <Plus size={15} /> Invite Member
                   </button>
@@ -551,7 +609,7 @@ export default function SettingsPage() {
 
                 {loadingUsers ? (
                   <div className="flex flex-col items-center justify-center py-16 gap-3 text-gray-400">
-                    <Loader2 size={24} className="animate-spin text-[#001CB0]" />
+                    <Loader2 size={24} className="animate-spin text-[#1b365f]" />
                     <span className="text-sm font-medium">Loading team members…</span>
                   </div>
                 ) : (
@@ -578,7 +636,7 @@ export default function SettingsPage() {
                                 ) : (
                                   <div
                                     className="w-10 h-10 rounded-xl flex items-center justify-center text-white text-xs font-bold shrink-0"
-                                    style={{ background: user.id === currentUserId ? '#E66423' : '#001CB0' }}
+                                    style={{ background: user.id === currentUserId ? '#E66423' : '#1b365f' }}
                                   >
                                     {user.avatarInitials}
                                   </div>
@@ -607,23 +665,40 @@ export default function SettingsPage() {
                               </span>
                             </td>
                             <td className="px-7 py-5">
-                              <button
-                                onClick={() => {
-                                  setEditingUser(user);
-                                  setEditFirstName(user.firstName);
-                                  setEditLastName(user.lastName);
-                                  setEditEmail(user.email);
-                                  setEditPassword('');
-                                  setEditRole(user.role as any);
-                                  setEditDivision(user.division ?? 'Human Resources');
-                                  setEditError(null);
-                                  setEditSuccess(null);
-                                  setShowEditModal(true);
-                                }}
-                                className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#001CB0] hover:bg-[#001CB0]/10 transition-all"
-                              >
-                                <Edit2 size={13} />
-                              </button>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => {
+                                    setEditingUser(user);
+                                    setEditFirstName(user.firstName);
+                                    setEditLastName(user.lastName);
+                                    setEditEmail(user.email);
+                                    setEditPassword('');
+                                    setEditRole(user.role as any);
+                                    setEditDivision(user.division ?? 'Human Resources');
+                                    setEditError(null);
+                                    setEditSuccess(null);
+                                    setShowEditModal(true);
+                                  }}
+                                  className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-[#1b365f] hover:bg-[#1b365f]/10 transition-all"
+                                  title="Edit member"
+                                >
+                                  <Edit2 size={13} />
+                                </button>
+                                {canDelete(user) && (
+                                  <button
+                                    onClick={() => {
+                                      setDeletingUser(user);
+                                      setDeleteError(null);
+                                      setDeleteSuccess(null);
+                                      setShowDeleteModal(true);
+                                    }}
+                                    className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all"
+                                    title="Delete member"
+                                  >
+                                    <Trash2 size={13} />
+                                  </button>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -651,9 +726,9 @@ export default function SettingsPage() {
                     },
                     {
                       role: 'HR Manager',
-                      color: '#001CB0',
-                      bg: 'bg-[#001CB0]/5',
-                      border: 'border-[#001CB0]/15',
+                      color: '#1b365f',
+                      bg: 'bg-[#1b365f]/5',
+                      border: 'border-[#1b365f]/15',
                       permissions: ['All jobs and candidates', 'Analytics dashboard', 'Team oversight', 'Exportable reports', 'Interview invitations'],
                     },
                     {
@@ -703,7 +778,7 @@ export default function SettingsPage() {
                         aria-checked={notifs[item.key as keyof typeof notifs]}
                         onClick={() => setNotifs(n => ({ ...n, [item.key]: !n[item.key as keyof typeof notifs] }))}
                         className={`relative w-11 h-6 rounded-full transition-all duration-300 focus:outline-none shrink-0 ${
-                          notifs[item.key as keyof typeof notifs] ? 'bg-[#001CB0]' : 'bg-gray-200'
+                          notifs[item.key as keyof typeof notifs] ? 'bg-[#1b365f]' : 'bg-slate-300'
                         }`}
                       >
                         <span
@@ -716,7 +791,7 @@ export default function SettingsPage() {
                   ))}
                 </div>
 
-                <button className="mt-8 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-[#0A0F24] hover:bg-[#001CB0] transition-all shadow-sm">
+                <button className="mt-8 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-[#0A0F24] hover:bg-[#1b365f] transition-all shadow-sm">
                   <Save size={14} /> Save Preferences
                 </button>
               </div>
@@ -739,7 +814,7 @@ export default function SettingsPage() {
                         <input
                           id="retention"
                           type="number"
-                          className="w-28 px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                          className="w-28 px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#1b365f] focus:ring-2 focus:ring-[#1b365f]/10 transition-all"
                           value={retention}
                           onChange={e => setRetention(e.target.value)}
                           min="30"
@@ -777,7 +852,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
 
-                  <button className="mt-8 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-[#0A0F24] hover:bg-[#001CB0] transition-all shadow-sm">
+                  <button className="mt-8 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-[#0A0F24] hover:bg-[#1b365f] transition-all shadow-sm">
                     <Save size={14} /> Save Compliance Settings
                   </button>
                 </div>
@@ -792,7 +867,7 @@ export default function SettingsPage() {
 
                 <div className="space-y-0 divide-y divide-gray-50">
                   {[
-                    { label: 'JWT Access Token Expiry',  value: '15 minutes',           badge: 'Recommended', badgeColor: 'text-[#001CB0] bg-[#001CB0]/10' },
+                    { label: 'JWT Access Token Expiry',  value: '15 minutes',           badge: 'Recommended', badgeColor: 'text-[#1b365f] bg-[#1b365f]/10' },
                     { label: 'JWT Refresh Token Expiry', value: '7 days',               badge: null, badgeColor: '' },
                     { label: 'Password Minimum Length',  value: '12 characters',         badge: null, badgeColor: '' },
                     { label: 'Rate Limiting',            value: '100 req/min per IP',    badge: 'Active', badgeColor: 'text-green-700 bg-green-50' },
@@ -826,7 +901,7 @@ export default function SettingsPage() {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-gray-150 overflow-hidden animate-fade-in-up">
             <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
               <h3 className="font-bold text-[#0A0F24] flex items-center gap-2 text-base">
-                <Plus size={18} className="text-[#001CB0]" /> Invite Team Member
+                <Plus size={18} className="text-[#1b365f]" /> Invite Team Member
               </h3>
               <button
                 onClick={() => setShowInviteModal(false)}
@@ -860,7 +935,7 @@ export default function SettingsPage() {
                     type="text"
                     required
                     placeholder="e.g. Sarah Jenkins"
-                    className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                    className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#1b365f] focus:ring-2 focus:ring-[#1b365f]/10 transition-all"
                     value={inviteFullName}
                     onChange={e => setInviteFullName(e.target.value)}
                   />
@@ -875,7 +950,7 @@ export default function SettingsPage() {
                     type="email"
                     required
                     placeholder="e.g. sarah.jenkins@agl.co.za"
-                    className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                    className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#1b365f] focus:ring-2 focus:ring-[#1b365f]/10 transition-all"
                     value={inviteEmail}
                     onChange={e => setInviteEmail(e.target.value)}
                   />
@@ -889,7 +964,7 @@ export default function SettingsPage() {
                     id="invite-password"
                     type="text"
                     required
-                    className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all font-mono"
+                    className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#1b365f] focus:ring-2 focus:ring-[#1b365f]/10 transition-all font-mono"
                     value={invitePassword}
                     onChange={e => setInvitePassword(e.target.value)}
                   />
@@ -903,7 +978,7 @@ export default function SettingsPage() {
                     <div className="relative">
                       <select
                         id="invite-role"
-                        className="w-full appearance-none px-4 py-2.5 pr-8 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all cursor-pointer"
+                        className="w-full appearance-none px-4 py-2.5 pr-8 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#1b365f] focus:ring-2 focus:ring-[#1b365f]/10 transition-all cursor-pointer"
                         value={inviteRole}
                         onChange={e => setInviteRole(e.target.value as any)}
                       >
@@ -922,7 +997,7 @@ export default function SettingsPage() {
                     <div className="relative">
                       <select
                         id="invite-division"
-                        className="w-full appearance-none px-4 py-2.5 pr-8 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all cursor-pointer"
+                        className="w-full appearance-none px-4 py-2.5 pr-8 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#1b365f] focus:ring-2 focus:ring-[#1b365f]/10 transition-all cursor-pointer"
                         value={inviteDivision}
                         onChange={e => setInviteDivision(e.target.value)}
                       >
@@ -949,7 +1024,7 @@ export default function SettingsPage() {
                 <button
                   type="submit"
                   disabled={inviteSubmitting}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-white bg-[#001CB0] hover:bg-[#0020CC] shadow-md shadow-[#001CB0]/20 transition-all disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-white bg-[#1b365f] hover:bg-[#1b365f] shadow-md shadow-[#1b365f]/20 transition-all disabled:opacity-50"
                 >
                   {inviteSubmitting ? (
                     <>
@@ -974,7 +1049,7 @@ export default function SettingsPage() {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-gray-150 overflow-hidden animate-fade-in-up">
             <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
               <h3 className="font-bold text-[#0A0F24] flex items-center gap-2 text-base">
-                <Edit2 size={16} className="text-[#001CB0]" /> Edit Team Member
+                <Edit2 size={16} className="text-[#1b365f]" /> Edit Team Member
               </h3>
               <button
                 onClick={() => setShowEditModal(false)}
@@ -1009,7 +1084,7 @@ export default function SettingsPage() {
                       type="text"
                       required
                       placeholder="First Name"
-                      className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                      className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#1b365f] focus:ring-2 focus:ring-[#1b365f]/10 transition-all"
                       value={editFirstName}
                       onChange={e => setEditFirstName(e.target.value)}
                     />
@@ -1022,7 +1097,7 @@ export default function SettingsPage() {
                       id="edit-lastname"
                       type="text"
                       placeholder="Last Name"
-                      className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                      className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#1b365f] focus:ring-2 focus:ring-[#1b365f]/10 transition-all"
                       value={editLastName}
                       onChange={e => setEditLastName(e.target.value)}
                     />
@@ -1038,7 +1113,7 @@ export default function SettingsPage() {
                     type="email"
                     required
                     placeholder="Email Address"
-                    className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                    className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#1b365f] focus:ring-2 focus:ring-[#1b365f]/10 transition-all"
                     value={editEmail}
                     onChange={e => setEditEmail(e.target.value)}
                   />
@@ -1052,7 +1127,7 @@ export default function SettingsPage() {
                     id="edit-password"
                     type="password"
                     placeholder="New Password"
-                    className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                    className="w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#1b365f] focus:ring-2 focus:ring-[#1b365f]/10 transition-all"
                     value={editPassword}
                     onChange={e => setEditPassword(e.target.value)}
                   />
@@ -1066,7 +1141,7 @@ export default function SettingsPage() {
                     <div className="relative">
                       <select
                         id="edit-role"
-                        className="w-full appearance-none px-4 py-2.5 pr-8 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all cursor-pointer"
+                        className="w-full appearance-none px-4 py-2.5 pr-8 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#1b365f] focus:ring-2 focus:ring-[#1b365f]/10 transition-all cursor-pointer"
                         value={editRole}
                         onChange={e => setEditRole(e.target.value as any)}
                       >
@@ -1085,7 +1160,7 @@ export default function SettingsPage() {
                     <div className="relative">
                       <select
                         id="edit-division"
-                        className="w-full appearance-none px-4 py-2.5 pr-8 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all cursor-pointer"
+                        className="w-full appearance-none px-4 py-2.5 pr-8 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#1b365f] focus:ring-2 focus:ring-[#1b365f]/10 transition-all cursor-pointer"
                         value={editDivision}
                         onChange={e => setEditDivision(e.target.value)}
                       >
@@ -1112,7 +1187,7 @@ export default function SettingsPage() {
                 <button
                   type="submit"
                   disabled={editSubmitting}
-                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-white bg-[#001CB0] hover:bg-[#0020CC] shadow-md shadow-[#001CB0]/20 transition-all disabled:opacity-50"
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-white bg-[#1b365f] hover:bg-[#1b365f] shadow-md shadow-[#1b365f]/20 transition-all disabled:opacity-50"
                 >
                   {editSubmitting ? (
                     <>
@@ -1123,6 +1198,87 @@ export default function SettingsPage() {
                     <>
                       <Save size={14} />
                       Save Changes
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* ── Delete Member Modal ── */}
+      {showDeleteModal && deletingUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0F24]/60 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-gray-150 overflow-hidden animate-fade-in-up">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+              <h3 className="font-bold text-red-600 flex items-center gap-2 text-base">
+                <AlertCircle size={18} /> Delete Team Member
+              </h3>
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleDeleteSubmit}>
+              <div className="px-6 py-5 space-y-4">
+                {deleteError && (
+                  <div className="flex items-center gap-2 p-3 rounded-xl text-xs font-semibold bg-red-50 border border-red-150 text-red-600">
+                    <AlertCircle size={14} className="shrink-0" />
+                    {deleteError}
+                  </div>
+                )}
+                {deleteSuccess && (
+                  <div className="flex items-center gap-2 p-3 rounded-xl text-xs font-semibold bg-green-50 border border-green-150 text-green-700">
+                    <CheckCircle size={14} className="shrink-0" />
+                    {deleteSuccess}
+                  </div>
+                )}
+
+                <div className="text-sm text-gray-600 space-y-3">
+                  <p>
+                    Are you sure you want to delete <span className="font-bold text-[#0A0F24]">{deletingUser.firstName} {deletingUser.lastName}</span> (<span className="font-semibold">{deletingUser.email}</span>)? This action is permanent and cannot be undone.
+                  </p>
+                  <div className="p-4 rounded-xl bg-amber-50 border border-amber-250 text-amber-850 text-xs space-y-2">
+                    <div className="flex items-center gap-1.5 font-bold">
+                      <AlertCircle size={14} className="text-amber-600" />
+                      Important Data Reassignment Notice:
+                    </div>
+                    <p className="leading-relaxed">
+                      All active and historical jobs created by this user will be reassigned to your account (<span className="font-semibold">{session?.email}</span>) to prevent system instability.
+                    </p>
+                    <p className="leading-relaxed">
+                      Platform audit logs associated with this user will be preserved but anonymized.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 px-6 py-5 border-t border-gray-100 bg-gray-50/50">
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteModal(false)}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-150 hover:text-gray-800 transition-all"
+                  disabled={deleteSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={deleteSubmitting}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-white bg-red-600 hover:bg-red-700 shadow-md shadow-red-600/25 transition-all disabled:opacity-50"
+                >
+                  {deleteSubmitting ? (
+                    <>
+                      <Loader2 size={14} className="animate-spin" />
+                      Deleting…
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 size={14} />
+                      Delete User
                     </>
                   )}
                 </button>

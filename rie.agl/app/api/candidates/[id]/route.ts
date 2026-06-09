@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '../../../lib/db';
+import { execute } from '../../../lib/db';
 
 interface Params { params: Promise<{ id: string }> }
 
@@ -22,7 +22,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
       Notes: string | null;
     }
 
-    const rows = await query<DBRow>(`
+    const rows = await execute<DBRow>(`
       SELECT
         ap.ApplicantID, ap.FullName, ap.Email, ap.Phone, ap.Location,
         ap.CreatedDate AS ApplicantCreatedDate,
@@ -36,8 +36,8 @@ export async function GET(_req: NextRequest, { params }: Params) {
       LEFT JOIN ATS_Scores ats   ON ats.ApplicationID = a.ApplicationID
       LEFT JOIN AI_Evaluations ai ON ai.ApplicationID = a.ApplicationID
       LEFT JOIN Jobs j           ON j.JobID = a.JobID
-      WHERE ap.ApplicantID = ${applicantId}
-    `);
+      WHERE ap.ApplicantID = ?
+    `, [applicantId]);
 
     if (!rows.length) {
       return NextResponse.json({ success: false, error: 'Candidate not found' }, { status: 404 });

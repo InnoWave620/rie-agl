@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query, esc } from '../../lib/db';
+import { execute } from '../../lib/db';
 import type { Division, Region, EmploymentType, JobStatus, ExperienceLevel, JobRequirement } from '../../types';
 
 // ── Mappers ──────────────────────────────────────────────────────────────────
@@ -107,14 +107,18 @@ export async function GET(req: NextRequest) {
 
     // Build WHERE clause
     const conditions: string[] = [];
+    const params: unknown[] = [];
     if (publicOnly || status === 'published') conditions.push(`j.Status = 'Open'`);
     else if (status === 'draft')              conditions.push(`j.Status = 'Draft'`);
     else if (status === 'closed')             conditions.push(`j.Status = 'Closed'`);
-    if (division && division !== 'all')       conditions.push(`j.Department = '${division.replace(/'/g, "''")}'`);
+    if (division && division !== 'all') {
+      conditions.push(`j.Department = ?`);
+      params.push(division);
+    }
 
     const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
 
-    const rows = await query<DBJob>(`
+    const rows = await execute<DBJob>(`
       SELECT
         j.JobID, j.Title, j.Department, j.Location, j.EmploymentType,
         j.Description, j.Requirements, j.SalaryMin, j.SalaryMax, j.Status, j.CreatedDate,
@@ -126,7 +130,7 @@ export async function GET(req: NextRequest) {
         j.JobID, j.Title, j.Department, j.Location, j.EmploymentType,
         j.Description, j.Requirements, j.SalaryMin, j.SalaryMax, j.Status, j.CreatedDate
       ORDER BY j.CreatedDate DESC
-    `);
+    `, params);
 
     const jobs = rows.map(mapJob);
     return NextResponse.json({ success: true, data: jobs, meta: { total: jobs.length } });
@@ -162,25 +166,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: 'Title is required' }, { status: 400 });
     }
 
-    const rows = await query<{ JobID: number }>(`
+    const rows = await execute<{ JobID: number }>(`
       INSERT INTO Jobs
         (Title, Department, Location, EmploymentType, Description, Requirements,
          SalaryMin, SalaryMax, Status, CreatedBy, CreatedDate)
       OUTPUT INSERTED.JobID
-      VALUES (
-        ${esc(title)},
-        ${esc(department)},
-        ${esc(locationFull)},
-        ${esc(empType)},
-        ${esc(description)},
-        ${esc(requirements || null)},
-        ${salaryMin ?? 'NULL'},
-        ${salaryMax ?? 'NULL'},
-        ${esc(status)},
-        ${createdBy},
-        GETDATE()
-      )
-    `);
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, GETDATE())
+    `, [
+      title,
+      department,
+      locationFull,
+      empType,
+      description,
+      requirements || null,
+      salaryMin,
+      salaryMax,
+      status,
+      createdBy
+    ]);
 
     const newId = rows[0]?.JobID;
 

@@ -18,7 +18,7 @@ const EMP_TYPES: { value: EmploymentType; label: string }[] = [
 ];
 const EXP_LEVELS: ExperienceLevel[] = ['Entry', 'Mid', 'Senior', 'Executive'];
 
-const fieldClass = "w-full bg-white border border-[#E2E6EF] rounded-xl px-4 py-2.5 text-sm text-[#0A0F24] placeholder:text-[#535E75] focus:outline-none focus:ring-2 focus:ring-[#001CB0]/20 focus:border-[#001CB0] transition-all duration-200";
+const fieldClass = "w-full bg-white border border-[#E2E6EF] rounded-xl px-4 py-2.5 text-sm text-[#0A0F24] placeholder:text-[#535E75] focus:outline-none focus:ring-2 focus:ring-[#1b365f]/20 focus:border-[#1b365f] transition-all duration-200";
 const labelClass = "block text-xs font-semibold text-[#535E75] uppercase tracking-wider mb-1.5";
 
 export default function EditJobPage({ params }: Props) {
@@ -173,7 +173,7 @@ export default function EditJobPage({ params }: Props) {
             <h3 className="text-lg font-bold text-[#0A0F24] mb-2">Job not found</h3>
             <Link
               href="/employer/jobs"
-              className="inline-flex items-center gap-2 px-4 py-2.5 mt-3 rounded-xl bg-gradient-to-r from-[#001CB0] to-[#0025E0] text-white text-sm font-semibold shadow-sm hover:opacity-95 transition-all duration-200"
+              className="inline-flex items-center gap-2 px-4 py-2.5 mt-3 rounded-xl bg-gradient-to-r from-[#1b365f] to-[#1b365f] text-white text-sm font-semibold shadow-sm hover:opacity-95 transition-all duration-200"
             >
               Back to Jobs
             </Link>
@@ -190,7 +190,7 @@ export default function EditJobPage({ params }: Props) {
         <div className="max-w-[1400px] mx-auto w-full flex items-center gap-4">
           <Link
             href={`/employer/jobs/${id}`}
-            className="inline-flex items-center gap-1.5 text-sm text-[#535E75] hover:text-[#001CB0] font-medium transition-colors duration-200"
+            className="inline-flex items-center gap-1.5 text-sm text-[#535E75] hover:text-[#1b365f] font-medium transition-colors duration-200"
           >
             <ArrowLeft size={15} />
             Back to Job
@@ -353,7 +353,7 @@ export default function EditJobPage({ params }: Props) {
               {/* Save Actions */}
               <div className="bg-white rounded-2xl border border-[#E2E6EF] shadow-sm p-5 space-y-3">
                 <button
-                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#001CB0] to-[#0025E0] text-white text-sm font-semibold shadow-sm hover:shadow-md hover:opacity-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#1b365f] to-[#1b365f] text-white text-sm font-semibold shadow-sm hover:shadow-md hover:opacity-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={() => handleSave('published')}
                   disabled={saving || !form.title}
                 >
@@ -377,10 +377,10 @@ export default function EditJobPage({ params }: Props) {
               </div>
 
               {/* AI Reminder */}
-              <div className="rounded-2xl p-5 bg-gradient-to-br from-[#001CB0]/5 to-[#0025E0]/10 border border-[#001CB0]/20">
+              <div className="rounded-2xl p-5 bg-gradient-to-br from-[#1b365f]/5 to-[#1b365f]/10 border border-[#1b365f]/20">
                 <div className="flex items-center gap-2 mb-2">
-                  <Sparkles size={15} className="text-[#001CB0]" />
-                  <span className="text-sm font-bold text-[#001CB0]">AI Scoring Active</span>
+                  <Sparkles size={15} className="text-[#1b365f]" />
+                  <span className="text-sm font-bold text-[#1b365f]">AI Scoring Active</span>
                 </div>
                 <p className="text-xs leading-relaxed text-[#535E75]">
                   Changes to requirements will affect how the AI scores future applications for this role.

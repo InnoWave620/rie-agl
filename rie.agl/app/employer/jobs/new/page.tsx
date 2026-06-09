@@ -17,7 +17,7 @@ const EMP_TYPES: { value: EmploymentType; label: string }[] = [
 ];
 const EXP_LEVELS: ExperienceLevel[] = ['Entry', 'Mid', 'Senior', 'Executive'];
 
-const fieldClass = "w-full bg-white border border-[#E2E6EF] rounded-xl px-4 py-2.5 text-sm text-[#0A0F24] placeholder:text-[#535E75] focus:outline-none focus:ring-2 focus:ring-[#001CB0]/20 focus:border-[#001CB0] transition-all duration-200";
+const fieldClass = "w-full bg-white border border-[#E2E6EF] rounded-xl px-4 py-2.5 text-sm text-[#0A0F24] placeholder:text-[#535E75] focus:outline-none focus:ring-2 focus:ring-[#1b365f]/20 focus:border-[#1b365f] transition-all duration-200";
 const labelClass = "block text-xs font-semibold text-[#535E75] uppercase tracking-wider mb-1.5";
 
 export default function NewJobPage() {
@@ -146,7 +146,7 @@ export default function NewJobPage() {
         <div className="max-w-[1400px] mx-auto w-full flex items-center gap-4">
           <Link
             href="/employer/jobs"
-            className="inline-flex items-center gap-1.5 text-sm text-[#535E75] hover:text-[#001CB0] font-medium transition-colors duration-200"
+            className="inline-flex items-center gap-1.5 text-sm text-[#535E75] hover:text-[#1b365f] font-medium transition-colors duration-200"
           >
             <ArrowLeft size={15} />
             Back to Jobs
@@ -172,14 +172,14 @@ export default function NewJobPage() {
           <div className="p-6 space-y-6">
             {/* AI Document Upload Section */}
             <div className="bg-white rounded-2xl border border-[#E2E6EF] shadow-sm p-6 overflow-hidden relative transition-all duration-300">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#001CB0]/10 to-transparent rounded-bl-full pointer-events-none" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#1b365f]/10 to-transparent rounded-bl-full pointer-events-none" />
               
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <Sparkles className="text-[#001CB0]" size={18} />
+                    <Sparkles className="text-[#1b365f]" size={18} />
                     <h2 className="text-base font-bold text-[#0A0F24]">AI Job Spec Extractor</h2>
-                    <span className="bg-[#001CB0]/10 text-[#001CB0] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider animate-pulse">
+                    <span className="bg-[#1b365f]/10 text-[#1b365f] text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider animate-pulse">
                       AI Powered
                     </span>
                   </div>
@@ -196,8 +196,8 @@ export default function NewJobPage() {
                 onDrop={handleDrop}
                 className={`relative border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center transition-all duration-300 ${
                   dragActive
-                    ? 'border-[#001CB0] bg-[#001CB0]/5 scale-[1.01] shadow-sm'
-                    : 'border-[#E2E6EF] hover:border-[#001CB0] hover:bg-[#F8FAFC]'
+                    ? 'border-[#1b365f] bg-[#1b365f]/5 scale-[1.01] shadow-sm'
+                    : 'border-[#E2E6EF] hover:border-[#1b365f] hover:bg-[#F8FAFC]'
                 }`}
               >
                 <input
@@ -213,8 +213,8 @@ export default function NewJobPage() {
                   <div className="space-y-3 py-4">
                     <div className="flex justify-center">
                       <div className="relative">
-                        <Loader2 className="animate-spin text-[#001CB0]" size={36} />
-                        <Sparkles className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[#0025E0] animate-pulse" size={14} />
+                        <Loader2 className="animate-spin text-[#1b365f]" size={36} />
+                        <Sparkles className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[#1b365f] animate-pulse" size={14} />
                       </div>
                     </div>
                     <div>
@@ -269,13 +269,13 @@ export default function NewJobPage() {
                 ) : (
                   <div className="space-y-3">
                     <div className="flex justify-center">
-                      <div className="bg-[#001CB0]/5 p-3 rounded-full border border-[#001CB0]/10 text-[#001CB0]">
+                      <div className="bg-[#1b365f]/5 p-3 rounded-full border border-[#1b365f]/10 text-[#1b365f]">
                         <UploadCloud size={24} />
                       </div>
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-[#0A0F24]">
-                        Drag &amp; drop job specification file, or <span className="text-[#001CB0] hover:underline decoration-2 font-semibold">browse</span>
+                        Drag &amp; drop job specification file, or <span className="text-[#1b365f] hover:underline decoration-2 font-semibold">browse</span>
                       </h4>
                       <p className="text-xs text-[#535E75] mt-1">Supports PDF and Word Document (.docx) up to 10MB</p>
                     </div>
@@ -306,7 +306,7 @@ export default function NewJobPage() {
                     />
                     {form.title && (
                       <p className="text-xs mt-1.5 text-[#535E75]">
-                        Slug: <span className="font-mono text-[#001CB0]">/careers/{generateSlug(form.title)}-{form.location.toLowerCase().replace(/\s+/g, '-') || 'location'}</span>
+                        Slug: <span className="font-mono text-[#1b365f]">/careers/{generateSlug(form.title)}-{form.location.toLowerCase().replace(/\s+/g, '-') || 'location'}</span>
                       </p>
                     )}
                   </div>
@@ -440,10 +440,10 @@ export default function NewJobPage() {
               </div>
 
               {/* AI Scoring Banner */}
-              <div className="rounded-2xl p-5 bg-gradient-to-br from-[#001CB0]/5 to-[#0025E0]/10 border border-[#001CB0]/20">
+              <div className="rounded-2xl p-5 bg-gradient-to-br from-[#1b365f]/5 to-[#1b365f]/10 border border-[#1b365f]/20">
                 <div className="flex items-center gap-2 mb-2">
-                  <Sparkles size={15} className="text-[#001CB0]" />
-                  <span className="text-sm font-bold text-[#001CB0]">AI Scoring Active</span>
+                  <Sparkles size={15} className="text-[#1b365f]" />
+                  <span className="text-sm font-bold text-[#1b365f]">AI Scoring Active</span>
                 </div>
                 <p className="text-xs leading-relaxed text-[#535E75]">
                   When you publish, all incoming CVs will be automatically scored across six dimensions using the job requirements you've entered.

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createToken, cookieOptions, COOKIE_NAME, verifyToken } from '../../lib/auth';
-import { query, esc } from '../../lib/db';
+import { execute } from '../../lib/db';
 import bcrypt from 'bcryptjs';
 import type { AuthSession } from '../../types';
 
@@ -41,11 +41,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Fetch user from DB
-    const rows = await query<DBUser>(`
+    const rows = await execute<DBUser>(`
       SELECT UserID, FullName, Email, RoleName, Department, IsActive, PasswordHash, AvatarUrl
       FROM Users
-      WHERE Email = ${esc(email.trim().toLowerCase())}
-    `);
+      WHERE Email = ?
+    `, [email.trim().toLowerCase()]);
 
     if (!rows.length) {
       return NextResponse.json(

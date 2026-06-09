@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createToken, cookieOptions, COOKIE_NAME } from '../../../lib/auth';
-import { query, esc } from '../../../lib/db';
+import { execute } from '../../../lib/db';
 import bcrypt from 'bcryptjs';
 import type { AuthSession } from '../../../types';
 
@@ -27,9 +27,9 @@ export async function POST(req: NextRequest) {
     const emailLower = email.trim().toLowerCase();
 
     // Check if email already exists
-    const existing = await query<{ UserID: number }>(`
-      SELECT UserID FROM Users WHERE Email = ${esc(emailLower)}
-    `);
+    const existing = await execute<{ UserID: number }>(`
+      SELECT UserID FROM Users WHERE Email = ?
+    `, [emailLower]);
 
     if (existing.length > 0) {
       return NextResponse.json(
@@ -47,19 +47,11 @@ export async function POST(req: NextRequest) {
     const dept = (department ?? 'Human Resources').trim();
 
     // Insert user
-    const rows = await query<{ UserID: number }>(`
+    const rows = await execute<{ UserID: number }>(`
       INSERT INTO Users (FullName, Email, RoleName, Department, PasswordHash, IsActive, CreatedDate)
       OUTPUT INSERTED.UserID
-      VALUES (
-        ${esc(fullName.trim())},
-        ${esc(emailLower)},
-        ${esc(roleName)},
-        ${esc(dept)},
-        ${esc(passwordHash)},
-        1,
-        GETDATE()
-      )
-    `);
+      VALUES (?, ?, ?, ?, ?, 1, GETDATE())
+    `, [fullName.trim(), emailLower, roleName, dept, passwordHash]);
 
     const newUserId = rows[0]?.UserID;
     if (!newUserId) {

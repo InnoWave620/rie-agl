@@ -18,7 +18,7 @@ function LayoutContent({ user, children }: Props) {
   const { mobileOpen, setMobileOpen } = useSidebar();
 
   return (
-    <div className="flex min-h-screen bg-[#F4F6F9] overflow-x-hidden">
+    <div className="flex h-screen bg-[#F4F6F9] overflow-hidden">
       {/* Sidebar Container */}
       <div
         className={`

@@ -141,7 +141,7 @@ export default async function JobDetailPage({ params }: Props) {
           <div className="flex items-center gap-3">
             <Link
               href="/employer/jobs"
-              className="inline-flex items-center gap-1.5 text-sm text-[#535E75] hover:text-[#001CB0] font-medium transition-colors duration-200"
+              className="inline-flex items-center gap-1.5 text-sm text-[#535E75] hover:text-[#1b365f] font-medium transition-colors duration-200"
             >
               <ArrowLeft size={15} />
               All Jobs
@@ -165,7 +165,7 @@ export default async function JobDetailPage({ params }: Props) {
             </Link>
             <Link
               href={`/employer/jobs/${job.id}/edit`}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#001CB0] to-[#0025E0] text-white text-sm font-semibold shadow-sm hover:shadow-md hover:opacity-95 transition-all duration-200"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#1b365f] to-[#1b365f] text-white text-sm font-semibold shadow-sm hover:shadow-md hover:opacity-95 transition-all duration-200"
             >
               <Edit2 size={14} />
               Edit Job
@@ -255,7 +255,7 @@ export default async function JobDetailPage({ params }: Props) {
                     <tr key={app.id} className="hover:bg-[#F4F6F9] transition-colors duration-150">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-full flex items-center justify-center bg-gradient-to-br from-[#001CB0] to-[#0025E0] text-white text-xs font-bold shrink-0">
+                          <div className="w-9 h-9 rounded-full flex items-center justify-center bg-gradient-to-br from-[#1b365f] to-[#1b365f] text-white text-xs font-bold shrink-0">
                             {app.candidate.firstName[0] ?? '?'}{app.candidate.lastName[0] ?? ''}
                           </div>
                           <div>
@@ -300,7 +300,7 @@ export default async function JobDetailPage({ params }: Props) {
                       <td className="px-6 py-4 text-right">
                         <Link
                           href={`/employer/candidates/${app.candidateId}?appId=${app.id}`}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#001CB0] to-[#0025E0] text-white text-xs font-semibold hover:shadow-md hover:opacity-95 transition-all duration-200"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#1b365f] to-[#1b365f] text-white text-xs font-semibold hover:shadow-md hover:opacity-95 transition-all duration-200"
                         >
                           <Eye size={12} />
                           View

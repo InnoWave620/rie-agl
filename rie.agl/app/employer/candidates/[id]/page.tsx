@@ -130,7 +130,7 @@ export default function CandidateProfilePage({ params }: Props) {
         <Header title="Loading…" subtitle="Fetching candidate profile" />
         <main className="flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center gap-4 text-gray-400">
-            <Loader2 size={32} className="animate-spin text-[#001CB0]" />
+            <Loader2 size={32} className="animate-spin text-[#1b365f]" />
             <span className="text-sm font-medium">Loading candidate profile…</span>
           </div>
         </main>
@@ -148,7 +148,7 @@ export default function CandidateProfilePage({ params }: Props) {
               <User size={40} />
             </div>
             <h3 className="font-bold text-xl text-[#0A0F24] mb-2">Candidate not found</h3>
-            <Link href="/employer/jobs" className="mt-3 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-[#001CB0] hover:bg-[#0020CC] transition-all">
+            <Link href="/employer/jobs" className="mt-3 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-[#1b365f] hover:bg-[#1b365f] transition-all">
               Back to Jobs
             </Link>
           </div>
@@ -192,7 +192,7 @@ export default function CandidateProfilePage({ params }: Props) {
         <div className="max-w-[1400px] mx-auto w-full">
           <Link
             href={job ? `/employer/jobs/${job.id}` : '/employer/jobs'}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-gray-500 bg-white border border-gray-200 hover:border-[#001CB0]/30 hover:text-[#001CB0] transition-all mb-6 shadow-sm"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-gray-500 bg-white border border-gray-200 hover:border-[#1b365f]/30 hover:text-[#1b365f] transition-all mb-6 shadow-sm"
           >
             <ArrowLeft size={14} /> Back to Applicants
           </Link>
@@ -207,7 +207,7 @@ export default function CandidateProfilePage({ params }: Props) {
               {/* Avatar with gradient */}
               <div
                 className="w-24 h-24 rounded-2xl flex items-center justify-center text-white text-2xl font-black mx-auto mb-4 shadow-lg"
-                style={{ background: 'linear-gradient(135deg, #001CB0, #0025E0)' }}
+                style={{ background: 'linear-gradient(135deg, #1b365f, #1b365f)' }}
               >
                 {candidate.firstName[0]}{candidate.lastName[0]}
               </div>
@@ -252,8 +252,8 @@ export default function CandidateProfilePage({ params }: Props) {
                   { icon: MapPin, value: candidate.location, label: 'Location' },
                 ].filter(d => d.value).map(d => (
                   <div key={d.label} className="flex items-center gap-3 text-sm">
-                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-[#001CB0]/10">
-                      <d.icon size={14} className="text-[#001CB0]" />
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 bg-[#1b365f]/10">
+                      <d.icon size={14} className="text-[#1b365f]" />
                     </div>
                     <span className="text-gray-700 text-xs font-medium truncate">{d.value}</span>
                   </div>
@@ -296,7 +296,7 @@ export default function CandidateProfilePage({ params }: Props) {
                   </>
                 )}
 
-                <button className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-[#001CB0] bg-[#001CB0]/10 hover:bg-[#001CB0]/20 transition-all">
+                <button className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-[#1b365f] bg-[#1b365f]/10 hover:bg-[#1b365f]/20 transition-all">
                   <ThumbsUp size={14} /> Promote to HR Review
                 </button>
                 {application?.status !== 'rejected' && (
@@ -327,8 +327,8 @@ export default function CandidateProfilePage({ params }: Props) {
                   onClick={() => setActiveTab(tab.key)}
                   className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
                     activeTab === tab.key
-                      ? 'bg-[#001CB0] text-white shadow-md shadow-[#001CB0]/20'
-                      : 'text-gray-500 hover:text-[#001CB0] hover:bg-[#001CB0]/5'
+                      ? 'bg-[#1b365f] text-white shadow-md shadow-[#1b365f]/20'
+                      : 'text-gray-500 hover:text-[#1b365f] hover:bg-[#1b365f]/5'
                   }`}
                 >
                   <tab.icon size={14} />
@@ -393,7 +393,7 @@ export default function CandidateProfilePage({ params }: Props) {
                     </div>
 
                     {application.aiSummary && (
-                      <div className="mt-6 p-4 rounded-xl text-sm leading-relaxed italic text-[#0A0F24] bg-[#001CB0]/5 border border-[#001CB0]/10">
+                      <div className="mt-6 p-4 rounded-xl text-sm leading-relaxed italic text-[#0A0F24] bg-[#1b365f]/5 border border-[#1b365f]/10">
                         &ldquo;{application.aiSummary}&rdquo;
                       </div>
                     )}
@@ -417,7 +417,7 @@ export default function CandidateProfilePage({ params }: Props) {
 
                 {application?.aiSummary ? (
                   <>
-                    <div className="p-5 rounded-xl text-sm leading-relaxed italic text-[#0A0F24] bg-[#001CB0]/5 border border-[#001CB0]/10">
+                    <div className="p-5 rounded-xl text-sm leading-relaxed italic text-[#0A0F24] bg-[#1b365f]/5 border border-[#1b365f]/10">
                       &ldquo;{application.aiSummary}&rdquo;
                     </div>
 
@@ -450,7 +450,7 @@ export default function CandidateProfilePage({ params }: Props) {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-4 p-5 rounded-xl bg-gradient-to-r from-[#0A0F24] to-[#001CB0] text-white">
+                    <div className="flex items-center gap-4 p-5 rounded-xl bg-gradient-to-r from-[#0A0F24] to-[#1b365f] text-white">
                       <BrainCircuit size={28} />
                       <div>
                         <div className="text-xs font-bold text-white/60 uppercase tracking-wider mb-0.5">AI Recommendation</div>
@@ -480,7 +480,7 @@ export default function CandidateProfilePage({ params }: Props) {
                   Internal notes about this candidate — not visible to the applicant.
                 </p>
                 <textarea
-                  className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] placeholder-gray-300 focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all resize-vertical"
+                  className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] placeholder-gray-300 focus:outline-none focus:bg-white focus:border-[#1b365f] focus:ring-2 focus:ring-[#1b365f]/10 transition-all resize-vertical"
                   rows={8}
                   placeholder="Add your assessment notes, interview feedback, or concerns here..."
                   value={notes}
@@ -515,7 +515,7 @@ export default function CandidateProfilePage({ params }: Props) {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h3 className="font-bold text-[#0A0F24] flex items-center gap-2">
-                <Send size={16} className="text-[#001CB0]" /> Send Interview Invitation
+                <Send size={16} className="text-[#1b365f]" /> Send Interview Invitation
               </h3>
               <button
                 onClick={() => setShowInviteModal(false)}
@@ -542,7 +542,7 @@ export default function CandidateProfilePage({ params }: Props) {
                   <input
                     id="interview-date"
                     type="datetime-local"
-                    className="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all"
+                    className="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] focus:outline-none focus:bg-white focus:border-[#1b365f] focus:ring-2 focus:ring-[#1b365f]/10 transition-all"
                     value={inviteDate}
                     onChange={e => setInviteDate(e.target.value)}
                   />
@@ -555,7 +555,7 @@ export default function CandidateProfilePage({ params }: Props) {
                 </label>
                 <textarea
                   id="invite-msg"
-                  className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] placeholder-gray-300 focus:outline-none focus:bg-white focus:border-[#001CB0] focus:ring-2 focus:ring-[#001CB0]/10 transition-all resize-none"
+                  className="w-full px-4 py-3 text-sm rounded-xl border border-gray-200 bg-gray-50 text-[#0A0F24] placeholder-gray-300 focus:outline-none focus:bg-white focus:border-[#1b365f] focus:ring-2 focus:ring-[#1b365f]/10 transition-all resize-none"
                   rows={3}
                   placeholder="Add a personalised message to the invitation..."
                   value={inviteMessage}
@@ -563,7 +563,7 @@ export default function CandidateProfilePage({ params }: Props) {
                 />
               </div>
 
-              <div className="p-3 rounded-xl text-xs text-gray-400 bg-[#001CB0]/5 border border-[#001CB0]/10">
+              <div className="p-3 rounded-xl text-xs text-gray-400 bg-[#1b365f]/5 border border-[#1b365f]/10">
                 A branded AGL email with a calendar invite (.ics) will be sent to the candidate.
               </div>
             </div>
@@ -577,7 +577,7 @@ export default function CandidateProfilePage({ params }: Props) {
               </button>
               <button
                 onClick={() => { setInvited(true); setShowInviteModal(false); }}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-white bg-[#001CB0] hover:bg-[#0020CC] shadow-md shadow-[#001CB0]/20 transition-all"
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-white bg-[#1b365f] hover:bg-[#1b365f] shadow-md shadow-[#1b365f]/20 transition-all"
               >
                 <Send size={14} /> Send Invitation
               </button>

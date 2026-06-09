@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Header from '../../components/layout/Header';
 import JobCard from '../../components/jobs/JobCard';
 import type { Job, JobStatus, Division } from '../../types';
-import { Search, Plus, Grid, List, Loader2, Briefcase, ChevronDown, AlertCircle } from 'lucide-react';
+import { Search, Plus, Grid, List, Loader2, Briefcase, ChevronDown, AlertCircle, Trash2, X } from 'lucide-react';
 
 const STATUSES: { value: JobStatus | 'all'; label: string }[] = [
   { value: 'all',       label: 'All' },
@@ -31,8 +31,23 @@ export default function JobsPage() {
   const [division, setDivision] = useState<Division | 'all'>('all');
   const [view,     setView]     = useState<'grid' | 'list'>('grid');
 
+  const [session, setSession] = useState<any>(null);
+  const [deletingJobId, setDeletingJobId] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   useEffect(() => {
     setLoading(true);
+
+    fetch('/api/auth')
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && d.data?.user) {
+          setSession(d.data.user);
+        }
+      });
+
     fetch('/api/jobs')
       .then(r => r.json())
       .then(data => {
@@ -58,6 +73,40 @@ export default function JobsPage() {
     published: jobs.filter(j => j.status === 'published').length,
     draft:     jobs.filter(j => j.status === 'draft').length,
     closed:    jobs.filter(j => j.status === 'closed').length,
+  };
+
+  const isAdmin = session?.role === 'admin';
+
+  const handleDeleteJobClick = (jobId: string) => {
+    setDeletingJobId(jobId);
+    setDeleteError(null);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteJobSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!deletingJobId) return;
+
+    setDeleteSubmitting(true);
+    setDeleteError(null);
+
+    try {
+      const res = await fetch(`/api/jobs/${deletingJobId}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (data.success) {
+        setJobs(jobs.filter(j => j.id !== deletingJobId));
+        setShowDeleteModal(false);
+        setDeletingJobId(null);
+      } else {
+        setDeleteError(data.error ?? 'Failed to archive job.');
+      }
+    } catch {
+      setDeleteError('Network error archiving job.');
+    } finally {
+      setDeleteSubmitting(false);
+    }
   };
 
   return (
@@ -112,7 +161,7 @@ export default function JobsPage() {
           {/* Division Select */}
           <div className="relative">
             <select
-              className="appearance-none bg-white border border-[#E2E6EF] rounded-xl px-4 py-2.5 pr-9 text-sm text-[#0A0F24] font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-[#001CB0]/20 focus:border-[#001CB0] transition-all duration-200 cursor-pointer"
+              className="appearance-none bg-white border border-[#E2E6EF] rounded-xl px-4 py-2.5 pr-9 text-sm text-[#0A0F24] font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1b365f]/20 focus:border-[#1b365f] transition-all duration-200 cursor-pointer"
               value={division}
               onChange={e => setDivision(e.target.value as Division | 'all')}
             >
@@ -125,7 +174,7 @@ export default function JobsPage() {
           <div className="relative flex-1 min-w-[200px] max-w-sm">
             <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#535E75]" />
             <input
-              className="w-full bg-white border border-[#E2E6EF] rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#0A0F24] placeholder:text-[#535E75] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#001CB0]/20 focus:border-[#001CB0] transition-all duration-200"
+              className="w-full bg-white border border-[#E2E6EF] rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#0A0F24] placeholder:text-[#535E75] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1b365f]/20 focus:border-[#1b365f] transition-all duration-200"
               placeholder="Search jobs by title or location..."
               value={search}
               onChange={e => setSearch(e.target.value)}
@@ -201,7 +250,11 @@ export default function JobsPage() {
                 className="animate-fade-in-up"
                 style={{ animationDelay: `${i * 0.05}s`, opacity: 0 }}
               >
-                <JobCard job={job} variant="employer" />
+                <JobCard
+                  job={job}
+                  variant="employer"
+                  onDelete={isAdmin ? handleDeleteJobClick : undefined}
+                />
               </div>
             ))}
           </div>
@@ -232,6 +285,72 @@ export default function JobsPage() {
         )}
         </div>
       </main>
+      {/* ── Delete Job Modal ── */}
+      {showDeleteModal && deletingJobId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0A0F24]/60 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-gray-150 overflow-hidden animate-fade-in-up">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+              <h3 className="font-bold text-red-600 flex items-center gap-2 text-base">
+                <AlertCircle size={18} /> Archive/Delete Job Posting
+              </h3>
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleDeleteJobSubmit}>
+              <div className="px-6 py-5 space-y-4">
+                {deleteError && (
+                  <div className="flex items-center gap-2 p-3 rounded-xl text-xs font-semibold bg-red-50 border border-red-150 text-red-600">
+                    <AlertCircle size={14} className="shrink-0" />
+                    {deleteError}
+                  </div>
+                )}
+
+                <div className="text-sm text-gray-600 space-y-3">
+                  <p>
+                    Are you sure you want to close and archive the job posting <span className="font-bold text-[#0A0F24]">"{jobs.find(j => j.id === deletingJobId)?.title}"</span>?
+                  </p>
+                  <p className="leading-relaxed">
+                    This will set the job status to <span className="font-semibold text-gray-800">'Closed'</span>. It will be removed from the public careers site, and new candidates won't be able to apply. Existing applicant logs will remain preserved.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-3 px-6 py-5 border-t border-gray-100 bg-gray-50/50">
+                <button
+                  type="button"
+                  onClick={() => setShowDeleteModal(false)}
+                  className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-gray-600 bg-white border border-gray-200 hover:bg-gray-150 hover:text-gray-800 transition-all"
+                  disabled={deleteSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={deleteSubmitting}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-white bg-red-600 hover:bg-red-700 shadow-md shadow-red-600/25 transition-all disabled:opacity-50"
+                >
+                  {deleteSubmitting ? (
+                    <>
+                      <Loader2 size={14} className="animate-spin" />
+                      Closing…
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 size={14} />
+                      Close/Archive
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }

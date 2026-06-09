@@ -136,7 +136,7 @@ export default function CandidatesPage() {
                   onClick={() => setActiveTab(tab.value)}
                   className={`px-4 py-2.5 text-xs sm:text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 ${
                     activeTab === tab.value
-                      ? 'bg-gradient-to-r from-[#001CB0] to-[#0025E0] text-white'
+                      ? 'bg-gradient-to-r from-[#1b365f] to-[#1b365f] text-white'
                       : 'text-[#535E75] hover:bg-[#F4F6F9] hover:text-[#0A0F24]'
                   }`}
                 >
@@ -157,7 +157,7 @@ export default function CandidatesPage() {
             {/* Sort Select */}
             <div className="relative">
               <select
-                className="appearance-none bg-white border border-[#E2E6EF] rounded-xl px-4 py-2.5 pr-9 text-sm text-[#0A0F24] font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-[#001CB0]/20 focus:border-[#001CB0] transition-all duration-200 cursor-pointer"
+                className="appearance-none bg-white border border-[#E2E6EF] rounded-xl px-4 py-2.5 pr-9 text-sm text-[#0A0F24] font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1b365f]/20 focus:border-[#1b365f] transition-all duration-200 cursor-pointer"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as 'date' | 'score')}
               >
@@ -171,7 +171,7 @@ export default function CandidatesPage() {
             <div className="relative flex-1 min-w-[200px] max-w-sm">
               <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#535E75]" />
               <input
-                className="w-full bg-white border border-[#E2E6EF] rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#0A0F24] placeholder:text-[#535E75] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#001CB0]/20 focus:border-[#001CB0] transition-all duration-200"
+                className="w-full bg-white border border-[#E2E6EF] rounded-xl pl-10 pr-4 py-2.5 text-sm text-[#0A0F24] placeholder:text-[#535E75] shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1b365f]/20 focus:border-[#1b365f] transition-all duration-200"
                 placeholder="Search candidates, jobs..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -207,7 +207,7 @@ export default function CandidatesPage() {
               <p className="text-sm text-[#535E75] mb-4">{error}</p>
               <button
                 onClick={() => window.location.reload()}
-                className="px-5 py-2.5 bg-[#001CB0] text-white text-sm font-semibold rounded-xl hover:bg-[#0025D4] transition-colors"
+                className="px-5 py-2.5 bg-[#1b365f] text-white text-sm font-semibold rounded-xl hover:bg-[#1b365f] transition-colors"
               >
                 Try Again
               </button>
@@ -239,7 +239,7 @@ export default function CandidatesPage() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center gap-3">
                             <div
-                              className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 bg-gradient-to-br from-[#001CB0] to-[#0025E0] ring-2 ring-[#001CB0]/10"
+                              className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 bg-gradient-to-br from-[#1b365f] to-[#1b365f] ring-2 ring-[#1b365f]/10"
                             >
                               {app.candidate.firstName[0]}
                               {app.candidate.lastName[0]}
@@ -284,7 +284,7 @@ export default function CandidatesPage() {
                         <td className="px-6 py-4 text-right whitespace-nowrap">
                           <Link
                             href={`/employer/candidates/${app.candidateId}?appId=${app.id}`}
-                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#001CB0]/10 text-[#001CB0] text-xs font-bold hover:bg-[#001CB0] hover:text-white transition-all duration-200"
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#1b365f]/10 text-[#1b365f] text-xs font-bold hover:bg-[#1b365f] hover:text-white transition-all duration-200"
                           >
                             <Eye size={13} />
                             Profile

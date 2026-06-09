@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query, esc } from '../../../lib/db';
+import { execute } from '../../../lib/db';
 
 interface Params { params: Promise<{ id: string }> }
 
@@ -99,17 +99,17 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
   try {
     const [jobRows, appRows] = await Promise.all([
-      query<DBJob>(`
+      execute<DBJob>(`
         SELECT j.JobID, j.Title, j.Department, j.Location, j.EmploymentType,
           j.Description, j.Requirements, j.SalaryMin, j.SalaryMax, j.Status, j.CreatedDate,
           COUNT(a.ApplicationID) AS ApplicationCount
         FROM Jobs j
         LEFT JOIN Applications a ON a.JobID = j.JobID
-        WHERE j.JobID = ${jobId}
+        WHERE j.JobID = ?
         GROUP BY j.JobID, j.Title, j.Department, j.Location, j.EmploymentType,
           j.Description, j.Requirements, j.SalaryMin, j.SalaryMax, j.Status, j.CreatedDate
-      `),
-      query<DBApplication>(`
+      `, [jobId]),
+      execute<DBApplication>(`
         SELECT
           a.ApplicationID, a.ApplicantID, a.JobID, a.ApplicationStatus, a.CreatedDate,
           ap.FullName, ap.Email, ap.Phone, ap.Location,
@@ -119,9 +119,9 @@ export async function GET(_req: NextRequest, { params }: Params) {
         JOIN Applicants ap ON ap.ApplicantID = a.ApplicantID
         LEFT JOIN ATS_Scores ats ON ats.ApplicationID = a.ApplicationID
         LEFT JOIN AI_Evaluations ai ON ai.ApplicationID = a.ApplicationID
-        WHERE a.JobID = ${jobId}
+        WHERE a.JobID = ?
         ORDER BY a.CreatedDate DESC
-      `),
+      `, [jobId]),
     ]);
 
     if (!jobRows.length) {
@@ -173,35 +173,58 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     const body = await req.json();
 
     const sets: string[] = [];
+    const params: unknown[] = [];
 
-    if (body.title !== undefined)        sets.push(`Title = ${esc(body.title)}`);
-    if (body.division !== undefined)     sets.push(`Department = ${esc(body.division)}`);
-    if (body.description !== undefined)  sets.push(`Description = ${esc(body.description)}`);
-    if (body.requirements !== undefined) sets.push(`Requirements = ${esc(body.requirements || null)}`);
-    if (body.salaryMin !== undefined)    sets.push(`SalaryMin = ${body.salaryMin ? Number(body.salaryMin) : 'NULL'}`);
-    if (body.salaryMax !== undefined)    sets.push(`SalaryMax = ${body.salaryMax ? Number(body.salaryMax) : 'NULL'}`);
+    if (body.title !== undefined) {
+      sets.push('Title = ?');
+      params.push(body.title);
+    }
+    if (body.division !== undefined) {
+      sets.push('Department = ?');
+      params.push(body.division);
+    }
+    if (body.description !== undefined) {
+      sets.push('Description = ?');
+      params.push(body.description);
+    }
+    if (body.requirements !== undefined) {
+      sets.push('Requirements = ?');
+      params.push(body.requirements || null);
+    }
+    if (body.salaryMin !== undefined) {
+      sets.push('SalaryMin = ?');
+      params.push(body.salaryMin ? Number(body.salaryMin) : null);
+    }
+    if (body.salaryMax !== undefined) {
+      sets.push('SalaryMax = ?');
+      params.push(body.salaryMax ? Number(body.salaryMax) : null);
+    }
 
     if (body.location !== undefined || body.country !== undefined) {
       const loc   = String(body.location ?? '').trim();
       const cntry = String(body.country  ?? '').trim();
-      sets.push(`Location = ${esc([loc, cntry].filter(Boolean).join(', '))}`);
+      sets.push('Location = ?');
+      params.push([loc, cntry].filter(Boolean).join(', '));
     }
     if (body.employmentType !== undefined) {
       const et = body.employmentType === 'contract'   ? 'Contract' :
                  body.employmentType === 'internship' ? 'Internship' : 'Full Time';
-      sets.push(`EmploymentType = ${esc(et)}`);
+      sets.push('EmploymentType = ?');
+      params.push(et);
     }
     if (body.status !== undefined) {
       const dbStatus = body.status === 'published' ? 'Open' :
                        body.status === 'closed'    ? 'Closed' : 'Draft';
-      sets.push(`Status = ${esc(dbStatus)}`);
+      sets.push('Status = ?');
+      params.push(dbStatus);
     }
 
     if (sets.length === 0) {
       return NextResponse.json({ success: false, error: 'Nothing to update' }, { status: 400 });
     }
 
-    await query(`UPDATE Jobs SET ${sets.join(', ')} WHERE JobID = ${jobId}`);
+    params.push(jobId);
+    await execute(`UPDATE Jobs SET ${sets.join(', ')} WHERE JobID = ?`, params);
 
     return NextResponse.json({ success: true, data: { id, ...body, updatedAt: new Date().toISOString() } });
   } catch (error) {
@@ -218,7 +241,7 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     return NextResponse.json({ success: false, error: 'Invalid job ID' }, { status: 400 });
   }
   try {
-    await query(`UPDATE Jobs SET Status = 'Closed' WHERE JobID = ${jobId}`);
+    await execute("UPDATE Jobs SET Status = 'Closed' WHERE JobID = ?", [jobId]);
     return NextResponse.json({ success: true, message: 'Job archived', data: { id, status: 'closed' } });
   } catch (error) {
     return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
